@@ -1,1 +1,1 @@
-web: gunicorn tradingapp.wsgi
+web: gunicorn tradingapp.tradingapp.wsgi
