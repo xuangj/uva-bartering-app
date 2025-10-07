@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UVA Trading App</title>
+</head>
+<body>
+  <h1>UVA Trading App</h1>
+  {% if user.is_authenticated %}
+    <p>Hello, {{ user.username }}! <a href="{% url 'account_logout' %}">Logout</a></p>
+  {% else %}
+    <p>You are not logged in.</p>
+    <a href="{% url 'account_login' %}">Login with Google</a>
+  {% endif %}
+</body>
+</html>

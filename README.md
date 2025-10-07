@@ -38,6 +38,19 @@ Everything should be setup at this point and you can run the project with:
 python manage.py runserver
 ```
 
+### Authentication + .env
+
+If you want to make sure authentication is working, you will need to set up a local .env file with the correct google/django keys (reach out to josh for them).
+
+Example:
+
+```
+GOOGLE_CLIENT_ID=xxx
+GOOGLE_CLIENT_SECRET=xxx
+```
+
+It also contains a `DJANGO_SECRET_KEY=xxx` but I am not sure how critical this is to the project working yet.
+
 ## 🌐 Links
 
 Heroku Deployment: [https://uva-trading-app-0d9da62a5177.herokuapp.com/](https://uva-trading-app-0d9da62a5177.herokuapp.com/)
