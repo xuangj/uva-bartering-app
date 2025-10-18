@@ -7,7 +7,15 @@
 <body>
   <h1>UVA Trading App</h1>
   {% if user.is_authenticated %}
-    <p>Hello, {{ user.username }}! <a href="{% url 'account_logout' %}">Logout</a></p>
+    <p>Hello, {{ user.username }}!</p>
+
+    {% if user.is_superuser %}
+      <p>You are an <strong>admin user!</strong></p>
+    {% else %}
+      <p>You are a <strong>regular user!</strong></p>
+    {% endif %}
+
+    <a href="{% url 'account_logout' %}">Logout</a>
   {% else %}
     <p>You are not logged in.</p>
     <a href="{% url 'account_login' %}">Login with Google</a>
