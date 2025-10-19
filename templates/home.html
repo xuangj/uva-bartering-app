@@ -1,24 +1,84 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>UVA Trading App</title>
-</head>
-<body>
-  <h1>UVA Trading App</h1>
-  {% if user.is_authenticated %}
-    <p>Hello, {{ user.username }}!</p>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UVA Trading App</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.blue.min.css"
+		>
+	<link rel="stylesheet" href="{% static 'css/pico.css' %}">
+	<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  </head>
+  <body>
+    <!-- Navbar -->
+    <header>
+      <nav class="container">
+        <h2 style="margin: 0">UVA Trading App</h2>
+        <div>
+          {% if user.is_authenticated %}
+          <span>Hello, <strong>{{ user.username|capfirst }}</strong></span>
+          <a href="{% url 'account_logout' %}" role="button" class="contrast"
+            >Logout</a
+          >
+          {% else %}
+					<span>You are not logged in</span>
+          <a href="{% url 'account_login' %}" role="button"
+            >Login</a
+          >
+          {% endif %}
+        </div>
+      </nav>
+    </header>
 
-    {% if user.is_superuser %}
-      <p>You are an <strong>admin user!</strong></p>
-    {% else %}
-      <p>You are a <strong>regular user!</strong></p>
-    {% endif %}
+    <main class="container">
+      <!-- Banner -->
+      {% if user.is_authenticated and user.is_superuser %}
+      <div class="banner">
+        You are logged in as an <strong>admin user</strong>.
+        <a href="/admin">Go to admin dashboard</a>
+        <button onclick="document.getElementById('admin-banner').remove()">
+          &times;
+        </button>
+      </div>
+      {% endif %}
 
-    <a href="{% url 'account_logout' %}">Logout</a>
-  {% else %}
-    <p>You are not logged in.</p>
-    <a href="{% url 'account_login' %}">Login with Google</a>
-  {% endif %}
-</body>
+      <h3>Search Listings</h3>
+
+      <!-- Search form -->
+      <form class="search-form" method="get">
+        <label>
+          Name
+          <input type="text" name="name" placeholder="Search by name" />
+        </label>
+
+        <label>
+          Category
+          <select name="category">
+            <option value="">All</option>
+            <option value="electronics">Electronics</option>
+            <option value="books">Books</option>
+            <option value="clothing">Clothing</option>
+            <option value="furniture">Furniture</option>
+          </select>
+        </label>
+
+        <label>
+          Price Range
+          <div class="price-range">
+            <input type="number" name="price_min" placeholder="Min $" />
+            <input type="number" name="price_max" placeholder="Max $" />
+          </div>
+        </label>
+
+        <button type="submit">Search</button>
+      </form>
+
+      <hr />
+
+      <p>Content</p>
+    </main>
+  </body>
 </html>

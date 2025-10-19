@@ -1,0 +1,81 @@
+:root {
+  --primary-bg: color-mix(in srgb, var(--pico-primary) 20%, white);
+  --primary-fg: color-mix(in srgb, var(--pico-primary) 50%, black);
+  --primary-fg-2: color-mix(in srgb, var(--pico-primary) 75%, white);
+  --primary-border: color-mix(in srgb, var(--pico-primary) 30%, white);
+}
+
+/* ---- Navbar ---- */
+
+header {
+  background: var(--card-background-color);
+  padding: 0.75rem 0;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav a[role="button"] {
+  margin-left: 0.5rem;
+}
+
+/* ---- Banner ---- */
+
+.banner {
+  background: var(--primary-bg);
+  border: 1px solid var(--primary-border);
+  color: var(--primary-fg);
+  padding: 1rem;
+  border-radius: var(--pico-border-radius);
+  position: relative;
+  margin-bottom: var(--pico-block-spacing-vertical);
+}
+
+.banner a {
+  text-decoration: underline;
+}
+
+.banner button {
+  height: 100%;
+  color: var(--primary-fg-2);
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.banner button:hover {
+  color: var(--primary-fg);
+}
+
+/* ---- Search form ---- */
+
+form.search-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: end;
+  margin-top: 1rem;
+}
+
+form.search-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+form.search-form input[type="number"] {
+  width: 48%;
+}
+
+.price-range {
+  display: flex;
+  justify-content: space-between;
+  gap: 4%;
+}
