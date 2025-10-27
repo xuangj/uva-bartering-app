@@ -5,6 +5,7 @@
   <title>UVA Trading App</title>
 </head>
 <body>
+
   <h1>UVA Trading App</h1>
   {% if user.is_authenticated %}
     <p>Hello, {{ user.username }}!</p>
@@ -12,9 +13,56 @@
     {% if user.is_superuser %}
       <p>You are an <strong>admin user!</strong></p>
     {% else %}
+      <nav class="navbar navbar-expand-sm bg-light">
+      <div class="container-fluid">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Messaging</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
       <p>You are a <strong>regular user!</strong></p>
+      <p>Here are some things that are for sale!</p>
+      <div class="row">
+      <div class="col">
+        <div class="card" style="width:20rem;margin:20px 0 24px 0">
+        <img class="card-img-top" src="img_avatar3.png" alt="image" style="width:100%">
+        <div class="card-body">
+          <h4 class="card-title">Item Name</h4>
+          <p class="card-text">Some example text some example text.</p>
+          <a href="javascript:void(0)" class="btn btn-primary">Trade Offer</a>
+        </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" style="width:20rem;margin:20px 0 24px 0">
+        <img class="card-img-top" src="img_avatar3.png" alt="image" style="width:100%">
+        <div class="card-body">
+          <h4 class="card-title">Item Name</h4>
+          <p class="card-text">Some example text some example text. </p>
+          <a href="javascript:void(0)" class="btn btn-primary">Trade Offer</a>
+        </div>
+        </div>
+      </div>
+      <div class="col">
+                <div class="card" style="width:20rem;margin:20px 0 24px 0">
+        <img class="card-img-top" src="img_avatar3.png" alt="image" style="width:100%">
+        <div class="card-body">
+          <h4 class="card-title">Item Name</h4>
+          <p class="card-text">Some example text some example text.</p>
+          <a href="javascript:void(0)" class="btn btn-primary">Trade Offer</a>
+        </div>
+        </div>
+      </div>
+      </div>
     {% endif %}
-
     <a href="{% url 'account_logout' %}">Logout</a>
   {% else %}
     <p>You are not logged in.</p>
