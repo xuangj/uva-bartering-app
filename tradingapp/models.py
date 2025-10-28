@@ -32,9 +32,21 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE, 
         related_name='profile'
     )
-    location = models.CharField(max_length=100, blank=True)
-    bio = models.TextField(blank=True)
-    reputation_score = models.IntegerField(default=0)
+    location = models.CharField(max_length=100, blank=True, help_text="City and State/Region")
+    bio = models.TextField(blank=True, help_text="A short description about the user/seller.")
+
+    #This will require AWS S3 to work
+    # profile_image = models.ImageField(
+    #     # The 'profiles/' path will now be a folder *inside* your S3 bucket.
+    #     upload_to='profiles/', 
+    #     default='profiles/default.jpg',
+    #     blank=True
+    # )
+
+    reputation_score = models.IntegerField(
+        default=0, 
+        help_text="Accumulated score from positive/negative reviews."
+    )
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
