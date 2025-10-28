@@ -5,9 +5,8 @@
     <title>Moderator Dashboard</title>
 </head>
 <body>
-    <h1>Welcome, {{ user.username }}</h1>
     <h2>Moderator Dashboard</h2>
-    <p>You have moderator access!</p>
+    <p>Hello, {{user.username}}! This is the moderator dashboard (currently empty). </p>
 
     <a href="{% url 'account_logout' %}">Logout</a>
 </body>

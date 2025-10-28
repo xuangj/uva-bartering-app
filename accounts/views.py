@@ -9,7 +9,7 @@ def login_redirect_view(request):
     if user.is_staff:
         return redirect('moderator_dashboard')
     else:
-        return redirect('user_dashboard')
+        return redirect('home')
 
 # only load moderator dashboard if the user is staff
 @login_required
@@ -17,8 +17,3 @@ def moderator_dashboard(request):
     user = request.user
     if user.is_staff:
         return render(request, 'moderator_dashboard.html')
-
-# for loading regular user dashboard
-@login_required
-def user_dashboard(request):
-    return render(request, 'user_dashboard.html')
