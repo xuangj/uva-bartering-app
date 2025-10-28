@@ -18,7 +18,6 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE, 
         related_name='profile'
     )
-    location = models.CharField(max_length=100, blank=True, help_text="City and State/Region")
     bio = models.TextField(blank=True, help_text="A short description about the user/seller.")
 
     #This will require AWS S3 to work
@@ -42,12 +41,12 @@ class Item(models.Model):
     """
     Represents an item for sale on the marketplace.
     """
-    CONDITION_CHOICES = [
-        ('new', 'New'),
-        ('used_like_new', 'Used - Like New'),
-        ('used_good', 'Used - Good'),
-        ('used_fair', 'Used - Fair'),
-    ]
+    # CONDITION_CHOICES = [
+    #     ('new', 'New'),
+    #     ('used_like_new', 'Used - Like New'),
+    #     ('used_good', 'Used - Good'),
+    #     ('used_fair', 'Used - Fair'),
+    # ]
     
     # ForeignKey creates a one-to-many relationship: one user can have many items
     seller = models.ForeignKey(
@@ -57,8 +56,8 @@ class Item(models.Model):
     )
     title = models.CharField(max_length=200)
     description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, default='used_good')
+    # price = models.DecimalField(max_digits=10, decimal_places=2)
+    # condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, default='used_good')
     
     # Automatically set when the item is created
     date_posted = models.DateTimeField(auto_now_add=True)
