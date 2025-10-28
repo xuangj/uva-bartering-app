@@ -7,18 +7,16 @@
 <body>
   <h1>UVA Trading App</h1>
   {% if user.is_authenticated %}
-    <p>Hello, {{ user.username }}!</p>
-
-    {% if user.is_superuser %}
-      <p>You are an <strong>admin user!</strong></p>
-    {% else %}
-      <p>You are a <strong>regular user!</strong></p>
+    <p>Hello, {{ user.username }}! This is the home screen. </p>
+    {% if user.is_staff or user.is_superuser %}
+      <p>You have moderator privileges.</p>
+      <a href="{% url 'moderator_dashboard' %}">Go to Moderator Dashboard</a>
     {% endif %}
 
     <a href="{% url 'account_logout' %}">Logout</a>
   {% else %}
     <p>You are not logged in.</p>
-    <a href="{% url 'account_login' %}">Login with Google</a>
+    <a href="{% url 'account_login' %}">Click to login</a>
   {% endif %}
 </body>
 </html>
