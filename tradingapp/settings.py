@@ -14,7 +14,11 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Debug (False for production)
-DEBUG = os.getenv("DEBUG", "False") == "True"
+# DEBUG = os.getenv("DEBUG", "False") == "True"
+
+# AUDREY TURNING DEBUGGING ON FOR TESTING
+DEBUG = True
+
 ALLOWED_HOSTS = ["*"]
 # ALLOWED_HOSTS = ['uva-trading-app-0d9da62a5177.herokuapp.com', 'localhost', '127.0.0.1']
 
@@ -117,7 +121,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Authentication
 SITE_ID = 1
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = '/redirect/'
 LOGOUT_REDIRECT_URL = "/"
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",  # default
