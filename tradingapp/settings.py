@@ -98,9 +98,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-#Custom User Model
-AUTH_USER_MODEL = 'tradingapp.CustomUser'
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 LANGUAGE_CODE = "en-us"
