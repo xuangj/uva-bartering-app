@@ -2,12 +2,12 @@ name: Django Tests
 
 on:
   push:
-    branches: [main]
+    branches: ["*"]
   pull_request:
-    branches: [main]
+    branches: ["main"]
 
 jobs:
-  test:
+  django_tests:
     runs-on: ubuntu-latest
 
     services:
@@ -21,21 +21,19 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd="pg_isready -U postgres"
-          --health-interval=5s
+          --health-interval=10s
           --health-timeout=5s
           --health-retries=5
 
     env:
       DJANGO_SECRET_KEY: "testsecret"
       DEBUG: "True"
-      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/test_db"
+      DATABASE_URL: "postgres://postgres:postgres@127.0.0.1:5432/test_db"
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -44,10 +42,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run migrations
+      - name: Check running containers
+        run: docker ps -a
+
+      - name: Wait for Postgres
         run: |
-          python manage.py migrate
+          until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+
+      - name: Run migrations
+        run: python manage.py migrate
 
       - name: Run Django tests
-        run: |
-          python manage.py test
+        run: python manage.py test
