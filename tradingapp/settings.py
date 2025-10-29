@@ -72,10 +72,15 @@ ROOT_URLCONF = "tradingapp.urls"
 WSGI_APPLICATION = "tradingapp.wsgi.application"
 
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+IS_CI = os.getenv("GITHUB_ACTIONS") == "true"
 if os.getenv("DATABASE_URL"):
-    # Running on Heroku or another environment with DATABASE_URL set
-    DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
+    # Running on Heroku, CI, or another environment with DATABASE_URL set
+    DATABASES = {
+        "default": dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=not IS_CI,  # Disable SSL only in CI
+        )
+    }
 else:
     # Local development: use SQLite
     DATABASES = {
@@ -122,7 +127,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Authentication
 SITE_ID = 1
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",  # default
