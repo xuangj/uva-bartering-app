@@ -51,9 +51,18 @@ GOOGLE_CLIENT_SECRET=xxx
 
 It also contains a `DJANGO_SECRET_KEY=xxx` but I am not sure how critical this is to the project working yet.
 
+### Project Overview
+
+- All configuration is stored in `tradingapp/`
+- All functionality (models/views) are stored in the `core/` app
+- All `.html` templates are stored in `templates/`
+
+![App Architecture](docs/images/architecture.png)
+
 ## 🌐 Links
 
 Heroku Deployment: [https://uva-trading-app-0d9da62a5177.herokuapp.com/](https://uva-trading-app-0d9da62a5177.herokuapp.com/)
+
 - Connected to this repo and will reflect whatever is commited to `main`
 
 Link to [team-project-information](https://github.com/uva-cs3240-f25/team-project-information) repo (has sprint schedule)
