@@ -21,12 +21,12 @@ from django.views.generic import TemplateView
 
 # import views from the accounts app
 from accounts.views import login_redirect_view, moderator_dashboard
-
-
+from core import views as core_views
 urlpatterns = [
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path("accounts/", include("allauth.urls")),
     path("admin/", admin.site.urls),
     path('redirect/', login_redirect_view, name='login_redirect'),
     path('moderator/', moderator_dashboard, name='moderator_dashboard'),
+    path('post/new/', core_views.post_create, name='post_create'),
 ]

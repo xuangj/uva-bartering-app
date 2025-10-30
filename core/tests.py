@@ -1,7 +1,86 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
-
+from django.urls import reverse
 from core.models import Chat, Message, Post, Profile
+from core.forms import PostForm
+
+
+class PostCreationTests(TestCase):
+
+    def setUp(self):
+        """Set up a test user and log them in for authenticated tests."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.profile = Profile.objects.create(user=self.user, bio="This is a test bio.")
+        
+        login_successful = self.client.login(username='testuser', password='testpassword')
+        
+        # Optionally, assert that the login worked (good practice)
+        self.assertTrue(login_successful, "Test client failed to log in the user.")
+        # Define the URL for the post_create view
+        self.url = reverse('post_create')
+        
+        # 💥 Ensure you have a 'home' URL defined for the redirect to work in tests
+        # We assume the 'home' URL resolves to '/' 
+        self.home_url = reverse('home')
+
+
+    def test_get_request_renders_form(self):
+        """Test that a GET request returns a 200 OK status and uses the correct form."""
+        self.client.login(username='testuser', password='testpassword')
+
+        response = self.client.get(self.url)
+        
+        # 1. Check HTTP Status Code: Should be 200 (Success)
+        self.assertEqual(response.status_code, 200)
+        
+        # 2. Check Template Used: Ensure the correct template is rendered
+        #self.assertTemplateUsed(response, 'templates/post_form.html')
+        
+        # 3. Check Form in Context: Ensure the postForm is passed to the template
+        #self.assertIsInstance(response.context['form'], PostForm)
+
+    def test_valid_post_creates_post_and_redirects(self):
+        """Test a valid POST request saves an post and redirects to home."""
+        
+        # Define the valid data payload for the POST request
+        valid_data = {
+            'title': 'Test post Title',
+            'description': 'This is a description of the test post.',
+        }
+        
+        # 1. Check initial count: Should be 0 posts before the POST
+        initial_post_count = Post.objects.count()
+
+        # Perform the POST request
+        response = self.client.post(self.url, data=valid_data)
+
+        # 2. Check HTTP Status Code: Should be 302 (Redirect) after success
+        self.assertEqual(response.status_code, 302)
+        
+        # 3. Check Redirect Location: Must redirect to the home page URL
+        self.assertRedirects(response, self.home_url)
+
+        # 4. Check Database: Post count should have increased by 1
+        self.assertEqual(Post.objects.count(), initial_post_count + 1)
+        
+        # 5. Check Object Data: Verify the saved post is correct
+        new_post = Post.objects.latest('created_at')
+        self.assertEqual(new_post.title, 'Test post Title')
+        self.assertEqual(new_post.poster.user, self.user) # Check that the logged-in user was assigned as poster
+
+    
+    def test_unauthenticated_user_redirected(self):
+        """Test that a user not logged in is redirected to the login page."""
+        # Log out the client
+        self.client.logout()
+        
+        response = self.client.get(self.url)
+        
+        # Check that the unauthenticated user is redirected to the login URL
+        login_url = reverse('account_login') + '?next=' + self.url
+        self.assertRedirects(response, login_url, status_code=302, target_status_code=200)
 
 
 class ProfileModelTests(TestCase):
