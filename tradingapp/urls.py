@@ -21,6 +21,7 @@ from django.views.generic import TemplateView
 
 # import views from the accounts app
 from accounts.views import login_redirect_view, moderator_dashboard
+from messaging.views import  get_or_create_dm_thread, start_chat, inbox, chat
 
 
 urlpatterns = [
@@ -29,4 +30,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('redirect/', login_redirect_view, name='login_redirect'),
     path('moderator/', moderator_dashboard, name='moderator_dashboard'),
+    path("inbox/", inbox, name="inbox"),
+    path("chat/<int:thread_id>/", chat, name="chat"),
+    path("inbox/", inbox, name="inbox"),
+    path("start/<int:user_id>/", start_chat, name="start_chat"),
 ]

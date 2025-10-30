@@ -34,11 +34,16 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+
+    "daphne",
+
     "django.contrib.staticfiles",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+
+    'messaging',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +75,7 @@ TEMPLATES = [
 
 ROOT_URLCONF = "tradingapp.urls"
 WSGI_APPLICATION = "tradingapp.wsgi.application"
+ASGI_APPLICATION = "tradingapp.asgi.application"
 
 # Database
 IS_CI = os.getenv("GITHUB_ACTIONS") == "true"
