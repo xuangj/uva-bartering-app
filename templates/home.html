@@ -20,15 +20,19 @@
       <div class="container">
         <a class="navbar-brand" href="#">UVA Trading App</a>
         <div class="d-flex align-items-center">
+          <!-- Dropdown -->
           {% if user.is_authenticated %}
             <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
                       data-bs-toggle="dropdown" aria-expanded="false">
                 Hello, <strong>{{ user.username|capfirst }}</strong>
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a></li>
                 <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
+                {% if user.is_authenticated and user.is_staff %}
+                  <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Moderator Dashboard</a></li>
+                {% endif %}
               </ul>
             </div>
           {% else %}
@@ -46,14 +50,14 @@
 
     <main class="container py-4">
       <!-- Admin Banner -->
-      {% if user.is_authenticated and user.is_superuser %}
+      {% if user.is_authenticated and user.is_staff %}
       <div
         class="alert alert-primary alert-dismissible fade show d-flex justify-content-between align-items-center"
         role="alert"
       >
         <div>
-          You are logged in as an <strong>admin user</strong>.
-          <a href="{% url 'moderator_dashboard' %}" class="">Go to admin dashboard</a>
+          You are logged in as an <strong>moderator</strong>.
+          <a href="{% url 'moderator_dashboard' %}" class="">Go to moderator dashboard</a>
         </div>
         <button
           type="button"
