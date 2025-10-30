@@ -17,3 +17,10 @@ def moderator_dashboard(request):
     user = request.user
     if user.is_staff:
         return render(request, 'moderator_dashboard.html')
+    
+
+# each user gets a custom url and profile page
+@login_required
+def user_profile(request, username):
+    user = request.user
+    return render(request, 'profile.html')

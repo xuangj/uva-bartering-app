@@ -20,13 +20,17 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 
 # import views from the accounts app
-from accounts.views import login_redirect_view, moderator_dashboard
+from accounts import views
 
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path("accounts/", include("allauth.urls")),
     path("admin/", admin.site.urls),
-    path('redirect/', login_redirect_view, name='login_redirect'),
-    path('moderator/', moderator_dashboard, name='moderator_dashboard'),
+    path('redirect/', views.login_redirect_view, name='login_redirect'),
+    path('moderator/', views.moderator_dashboard, name='moderator_dashboard'),
+
+    # custom url for each user
+    path("user/<str:username>/", views.user_profile, name="user_profile"),
+
 ]
