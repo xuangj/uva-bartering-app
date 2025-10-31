@@ -22,4 +22,4 @@ def moderator_dashboard(request):
 # each user gets a custom url and profile page
 @login_required
 def user_profile(request, username):
-    return render(request, 'profile.html')
+    return render(request, 'profile.html', {'user': request.user})
