@@ -29,10 +29,10 @@
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a></li>
-                <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
                 {% if user.is_authenticated and user.is_staff %}
                   <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Moderator Dashboard</a></li>
                 {% endif %}
+                <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
               </ul>
             </div>
           {% else %}
