@@ -128,6 +128,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Authentication
 SITE_ID = 1
 LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = "/accounts/login/"
 LOGOUT_REDIRECT_URL = "/"
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",  # default
