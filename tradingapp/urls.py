@@ -15,21 +15,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+# import views from the accounts app
+from accounts.views import login_redirect_view, moderator_dashboard
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
-# import views from the accounts app
-from accounts.views import login_redirect_view, moderator_dashboard
-from messaging.views import  get_or_create_dm_thread, start_chat, inbox, chat
-
+from messaging.views import chat, get_or_create_dm_thread, inbox, start_chat
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path("accounts/", include("allauth.urls")),
     path("admin/", admin.site.urls),
-    path('redirect/', login_redirect_view, name='login_redirect'),
-    path('moderator/', moderator_dashboard, name='moderator_dashboard'),
+    path("redirect/", login_redirect_view, name="login_redirect"),
+    path("moderator/", moderator_dashboard, name="moderator_dashboard"),
     path("inbox/", inbox, name="inbox"),
     path("chat/<int:thread_id>/", chat, name="chat"),
     path("inbox/", inbox, name="inbox"),
