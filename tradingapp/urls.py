@@ -2,13 +2,18 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
-from core import views
+from core.views import login_redirect_view, moderator_dashboard, post_create
+from messaging.views import chat, get_or_create_dm_thread, inbox, start_chat
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path("accounts/", include("allauth.urls")),
     path("admin/", admin.site.urls),
-    path("redirect/", views.login_redirect_view, name="login_redirect"),
-    path("moderator/", views.moderator_dashboard, name="moderator_dashboard"),
-    path("post/new/", views.post_create, name="post_create"),
+    path("redirect/", login_redirect_view, name="login_redirect"),
+    path("moderator/", moderator_dashboard, name="moderator_dashboard"),
+    path("post/new/", post_create, name="post_create"),
+    path("inbox/", inbox, name="inbox"),
+    path("chat/<int:thread_id>/", chat, name="chat"),
+    path("inbox/", inbox, name="inbox"),
+    path("start/<int:user_id>/", start_chat, name="start_chat"),
 ]
