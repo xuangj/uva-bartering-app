@@ -2,11 +2,11 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
-from core.views import login_redirect_view, moderator_dashboard, post_create
+from core.views import home, login_redirect_view, moderator_dashboard, post_create
 from messaging.views import chat, get_or_create_dm_thread, inbox, start_chat
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="home.html"), name="home"),
+    path("", home, name="home"),
     path("accounts/", include("allauth.urls")),
     path("admin/", admin.site.urls),
     path("redirect/", login_redirect_view, name="login_redirect"),

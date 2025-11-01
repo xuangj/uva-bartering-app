@@ -3,9 +3,22 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render
 
 from .forms import PostForm
-from .models import Profile
+from .models import Post, Profile
 
-# --- Auth --- #
+# --- Pages --- #
+
+
+# Render listings page
+def home(request):
+    """Render homepage with all posts (and optional search filters)."""
+    posts = Post.objects.all().order_by("-created_at")
+
+    # Filter
+    name_query = request.GET.get("name")
+    if name_query:
+        posts = posts.filter(title__icontains=name_query)
+
+    return render(request, "home.html", {"posts": posts})
 
 
 # Handle default login
