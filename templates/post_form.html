@@ -1,27 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <title>Create a New Post</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Post a New Item for Trade</h1>
-
-    <form method="POST">
-        {% csrf_token %} 
-        
-        {{ form.as_p }} 
-        
-        <button type="submit">Publish Post</button>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Publish Post</button>
     </form>
-    
     {% if form.errors %}
-        <div style="color: red;">
-            Please correct the errors below:
-            {{ form.errors }}
-        </div>
+      <div style="color: red;">
+        Please correct the errors below:
+        {{ form.errors }}
+      </div>
     {% endif %}
-
-    <p><a href="{% url 'home' %}">Back to Home</a></p>
-</body>
+    <p>
+      <a href="{% url 'home' %}">Back to Home</a>
+    </p>
+  </body>
 </html>
+

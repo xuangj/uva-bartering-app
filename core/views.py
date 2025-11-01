@@ -41,12 +41,12 @@ def post_create(request):
 
             # Get the user profile
             try:
-                user_profile = request.user.profile
+                user = request.user
             except Profile.DoesNotExist:
                 return HttpResponseForbidden("User profile not found.")
 
             # Create the post
-            new_post.poster = user_profile
+            new_post.poster = user
             new_post.save()
 
             return redirect("home")
