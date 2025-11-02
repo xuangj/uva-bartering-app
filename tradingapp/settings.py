@@ -13,11 +13,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Debug (False for production)
-# DEBUG = os.getenv("DEBUG", "False") == "True"
-
-# AUDREY TURNING DEBUGGING ON FOR TESTING
-DEBUG = True
+# Debug
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ["*"]
 # ALLOWED_HOSTS = ['uva-trading-app-0d9da62a5177.herokuapp.com', 'localhost', '127.0.0.1']
@@ -29,6 +26,9 @@ SECRET_KEY = "django-insecure-8*!=uea8i-u&t7ifwy8dgj4@xd9&125(f&i%bezx#zg4e@8-*+
 # Application definition
 INSTALLED_APPS = [
     "core",
+    "messaging",
+    "daphne",
+    "storages",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -70,6 +70,7 @@ TEMPLATES = [
 
 ROOT_URLCONF = "tradingapp.urls"
 WSGI_APPLICATION = "tradingapp.wsgi.application"
+ASGI_APPLICATION = "tradingapp.asgi.application"
 
 # Database
 IS_CI = os.getenv("GITHUB_ACTIONS") == "true"
@@ -89,6 +90,26 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+# AWS S3 Bucket
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+AWS_QUERYSTRING_AUTH = False  # URLs are public
+AWS_DEFAULT_ACL = None  # rely on bucket policies
+
+# File storage
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -128,6 +149,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Authentication
 SITE_ID = 1
 LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = "/accounts/login/"
 LOGOUT_REDIRECT_URL = "/"
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",  # default
