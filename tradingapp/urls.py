@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
-from core.views import home, login_redirect_view, moderator_dashboard, post_create
+from core.views import home, login_redirect_view, moderator_dashboard, post_create, user_profile
 from messaging.views import chat, get_or_create_dm_thread, inbox, start_chat
 
 urlpatterns = [
@@ -16,4 +16,5 @@ urlpatterns = [
     path("chat/<int:thread_id>/", chat, name="chat"),
     path("inbox/", inbox, name="inbox"),
     path("start/<int:user_id>/", start_chat, name="start_chat"),
+    path("user/<str:username>/", user_profile, name="user_profile"),
 ]

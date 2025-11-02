@@ -40,6 +40,12 @@ def moderator_dashboard(request):
     return HttpResponseForbidden("You are not allowed to access this page.")
 
 
+# Profile pages
+@login_required
+def user_profile(request, username):
+    return render(request, 'profile.html', {'user': request.user})
+
+
 # --- Posts --- #
 
 
