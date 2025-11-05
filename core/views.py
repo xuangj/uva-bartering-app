@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render
 
-from .forms import PostForm
+from .forms import PostForm, ProfileForm
 from .models import Post, Profile
 
 # --- Pages --- #
@@ -43,7 +43,12 @@ def moderator_dashboard(request):
 # Profile pages
 @login_required
 def user_profile(request, username):
-    return render(request, 'profile.html', {'user': request.user})
+    user = request.user
+    if hasattr(user, 'profile'):
+        form = ProfileForm(instance=user.profile)
+    else:
+        form = None  # optional fallback
+    return render(request, 'profile.html', {'user': user, 'form': form})
 
 
 # --- Posts --- #
@@ -76,3 +81,25 @@ def post_create(request):
 
     # Render the template
     return render(request, "post_form.html", {"form": form})
+
+
+@login_required
+def edit_profile(request, username):
+    user = request.user
+
+    if username != user.username:
+        return HttpResponseForbidden("You can only edit your own profile")
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST, instance=user.profile)
+        if form.is_valid():
+            form.save()
+            return redirect("user_profile", username=user.username)
+    else:
+        form = ProfileForm(instance=user.profile)
+    
+    return render(
+        request,
+        "profile.html",
+        {"form": form, "user": user},
+    )

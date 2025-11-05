@@ -15,16 +15,23 @@ def unique_post_image_path(instance, filename):
     return os.path.join("posts", filename)
 
 
-# --- Database scheme --- #
-
+# --- Database scheme --- #    
 
 class Profile(models.Model):
+    ROLE_CHOICES = [
+        ('undergrad', 'Undergraduate Student'),
+        ('grad', 'Graduate Student'),
+        ('faculty', 'Faculty'),
+        ('other', 'Other'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='undergrad')
 
     def __str__(self):
         return self.user.username
-
+    
 
 class Post(models.Model):
     poster = models.ForeignKey(User, on_delete=models.CASCADE)
