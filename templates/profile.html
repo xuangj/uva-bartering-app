@@ -69,14 +69,22 @@
                                             </button>
                                         </div>
 
-                                        <div class="modal-body">
+                                        <div class="modal-body text-start" style="padding-left: 2rem">
                                             <div class="mb-3">
-                                                <label for="{{ form.bio.id_for_label }}" class="form-label">Bio</label>
+                                                <label for="{{ form.bio.id_for_label }}" class="form-label" style="font-weight: bold">Bio</label><br />
                                                 {{ form.bio }}
                                             </div>
                                             <div class="mb-3">
-                                                <label for="{{ form.role.id_for_label }}" class="form-label">Role</label>
+                                                <label for="{{ form.role.id_for_label }}" class="form-label">Role</label><br />
                                                 {{ form.role }}
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="{{form.sustainability_interests.id_for_label }}" class="form-label">Sustainability Interests</label>
+                                                {{ form.sustainability_interests }}
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="{{form.trading_interests.id_for_label }}" class="form-label">Trading Interests</label>
+                                                {{ form.trading_interests }}
                                             </div>
 
                                             {% if form.errors %}
@@ -96,6 +104,7 @@
                             </div>
                         </div>
 
+                        <!-- Display User Info -->
                         <h6 class="mb-2">{{user.profile.role}}</h6>
                         <p><a href="mailto:{{user.email}}">Email</a></p>
                         <!--{% if user.is_staff %}Moderator{% else %}Student{% endif %}
@@ -109,7 +118,31 @@
                                      <em> No bio yet. </em>
                                     {% endif %}
                                 </div>
-                            </div>
+                        </div>
+
+                        <div>
+                            {% if user.profile.sustainability_interests.all %}
+                                <ul>
+                                    {% for interest in user.profile.sustainability_interests.all %}
+                                        <span class="badge bg-success me-1">{{ interest.name }}</span>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <em> No sustainability interests chosen.</em>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            {% if user.profile.trading_interests.all %}
+                                <ul>
+                                    {% for interest in user.profile.trading_interests.all %}
+                                        <span class="badge bg-info me-1">{{ interest.name }}</span>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <em> No trading interests chosen.</em>
+                            {% endif %}
+                        </div>
 
                         <!-- message button -->
                         <button type="button" data-mdb-button-init data-mdb-ripple-init

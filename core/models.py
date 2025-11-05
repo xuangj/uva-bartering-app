@@ -17,18 +17,33 @@ def unique_post_image_path(instance, filename):
 
 # --- Database scheme --- #    
 
+class SustainabilityInterests(models.Model):
+    name = models.CharField(max_length=150, unique=True)
+    
+    def __str__(self):
+        return self.name
+
+
+class TradingInterests(models.Model):
+    name = models.CharField(max_length=150, unique=True)
+    
+    def __str__(self):
+        return self.name
+
+
 class Profile(models.Model):
     ROLE_CHOICES = [
-        ('undergrad', 'Undergraduate Student'),
-        ('grad', 'Graduate Student'),
-        ('faculty', 'Faculty'),
-        ('other', 'Other'),
+        ('Undergraduate Student', 'Undergraduate Student'),
+        ('Graduate Student', 'Graduate Student'),
+        ('Faculty', 'Faculty'),
+        ('Other', 'Other'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='undergrad')
-
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='undergrad')
+    sustainability_interests = models.ManyToManyField(SustainabilityInterests, blank=True)
+    trading_interests = models.ManyToManyField(TradingInterests, blank=True)
     def __str__(self):
         return self.user.username
     
@@ -42,3 +57,4 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
