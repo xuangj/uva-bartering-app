@@ -14,7 +14,8 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Debug
-DEBUG = os.getenv("DEBUG", "False") == "True"
+#DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 # ALLOWED_HOSTS = ['uva-trading-app-0d9da62a5177.herokuapp.com', 'localhost', '127.0.0.1']
@@ -27,7 +28,6 @@ SECRET_KEY = "django-insecure-8*!=uea8i-u&t7ifwy8dgj4@xd9&125(f&i%bezx#zg4e@8-*+
 INSTALLED_APPS = [
     "core",
     "messaging",
-    "daphne",
     "storages",
     "django.contrib.admin",
     "django.contrib.auth",

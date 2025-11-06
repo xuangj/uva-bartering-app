@@ -50,8 +50,62 @@
                             <img src="https://cdn-icons-png.flaticon.com/512/8847/8847419.png"
                                 class="rounded-circle img-fluid" style="width: 100px;" />
                         </div>
-
+                        
+                        <!-- Edit Profile -->
                         <h4 class="mb-2">{{user.username}}</h4>
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#profileModal">
+                            Edit Profile
+                        </button>
+
+                        <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModal" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content rounded-4">
+                                    <form method="POST" action="{% url 'edit_profile' username=user.username %}">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="profileModalLabel">Edit your profile</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+
+                                        <div class="modal-body text-start" style="padding-left: 2rem">
+                                            <div class="mb-3">
+                                                <label for="{{ form.bio.id_for_label }}" class="form-label" style="font-weight: bold">Bio</label><br />
+                                                {{ form.bio }}
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="{{ form.role.id_for_label }}" class="form-label">Role</label><br />
+                                                {{ form.role }}
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="{{form.sustainability_interests.id_for_label }}" class="form-label">Sustainability Interests</label>
+                                                {{ form.sustainability_interests }}
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="{{form.trading_interests.id_for_label }}" class="form-label">Trading Interests</label>
+                                                {{ form.trading_interests }}
+                                            </div>
+
+                                            {% if form.errors %}
+                                            <div class="text-danger mt-3">
+                                                Please correct the errors below:
+                                                {{ form.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                        </div>
+                                    </form>
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Display User Info -->
+                        <h6 class="mb-2">{{user.profile.role}}</h6>
                         <p><a href="mailto:{{user.email}}">Email</a></p>
                         <!--{% if user.is_staff %}Moderator{% else %}Student{% endif %}
                             <span class="mx-3">|</span> -->
@@ -64,13 +118,35 @@
                                      <em> No bio yet. </em>
                                     {% endif %}
                                 </div>
-                            </div>
+                        </div>
+
+                        <div>
+                            {% if user.profile.sustainability_interests.all %}
+                                <ul>
+                                    {% for interest in user.profile.sustainability_interests.all %}
+                                        <span class="badge bg-success me-1">{{ interest.name }}</span>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <em> No sustainability interests chosen.</em>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            {% if user.profile.trading_interests.all %}
+                                <ul>
+                                    {% for interest in user.profile.trading_interests.all %}
+                                        <span class="badge bg-info me-1">{{ interest.name }}</span>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <em> No trading interests chosen.</em>
+                            {% endif %}
+                        </div>
 
                         <!-- message button -->
-                        <button type="button" data-mdb-button-init data-mdb-ripple-init
-                            class="btn btn-primary btn-rounded btn-lg">
-                            Message
-                        </button>
+                        
+                        <a href="{% url 'inbox' %}" class="btn btn-primary btn-rounded btn-lg"> Messages </a>
                         <div class="d-flex justify-content-center text-center mt-3 mb-2">
                             <div class="px-3">
                                 <p class="mb-2 h5">0</p>
