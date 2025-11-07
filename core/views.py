@@ -52,8 +52,6 @@ def user_profile(request, username):
 
 
 # --- Posts --- #
-
-
 # Allow a user to create a new Post
 @login_required
 def post_create(request):
@@ -103,3 +101,6 @@ def edit_profile(request, username):
         "profile.html",
         {"form": form, "user": user},
     )
+
+
+
