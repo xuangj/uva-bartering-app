@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render
 
-from .forms import PostForm, ProfileForm
+from .forms import PostForm, ProfileForm, PfpForm
 from .models import Post, Profile
 
 # --- Pages --- #
@@ -103,4 +103,28 @@ def edit_profile(request, username):
     )
 
 
+# Change profile picture
+@login_required
+def change_pfp(request, username):
 
+    user = request.user
+    profile = request.user.profile
+
+    if username != user.username:
+        return HttpResponseForbidden("You cannot change others' profile pictures")
+
+    # Check the request method
+    if request.method == "POST":
+        form = PfpForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            pfp= form.save(commit=False)
+            # Create the post
+            pfp.save()
+
+            return redirect("user_profile", username=user.username)
+    else:
+        form = PfpForm(instance=profile)
+
+
+    # Render the template
+    return render(request, "pfp_change_form.html", {"form": form})

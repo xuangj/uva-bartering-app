@@ -6,7 +6,7 @@ import os
 from django.conf import settings
 from django.conf.urls.static import static
 
-from core.views import home, login_redirect_view, moderator_dashboard, post_create, user_profile, edit_profile
+from core.views import home, login_redirect_view, moderator_dashboard, post_create, user_profile, edit_profile, change_pfp
 from messaging.views import chat, get_or_create_dm_thread, inbox, start_chat
 
 urlpatterns = [
@@ -22,6 +22,8 @@ urlpatterns = [
     path("start/<int:user_id>/", start_chat, name="start_chat"),
     path("user/<str:username>/", user_profile, name="user_profile"),
     path("user/<str:username>/edit/", edit_profile, name="edit_profile"),
+    path("user/<str:username>/edit/pfp", change_pfp, name="change_pfp"),
+
 ]
 
 

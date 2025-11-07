@@ -44,6 +44,8 @@ class Profile(models.Model):
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='undergrad')
     sustainability_interests = models.ManyToManyField(SustainabilityInterests, blank=True)
     trading_interests = models.ManyToManyField(TradingInterests, blank=True)
+    pfp = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
+
     def __str__(self):
         return self.user.username
     
@@ -58,3 +60,4 @@ class Post(models.Model):
     def __str__(self):
         return self.title
     
+
