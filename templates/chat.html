@@ -4,28 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chat</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   </head>
-  <body class="bg-light">
-    <nav class="navbar navbar-expand-lg shadow-sm">
-      <div class="container d-flex justify-content-between align-items-center">
-        <a class="navbar-brand fw-semibold" href="#">UVA Trading App</a>
-        <div class="d-flex align-items-center">
-          {% if user.is_authenticated %}
-            <span class="me-3">Hello, <strong>{{ user.username|capfirst }}</strong></span>
-            <a href="{% url 'home' %}" class="btn btn-secondary btn-sm me-2">Home</a>
-            <a href="{% url 'inbox' %}" class="btn btn-primary btn-sm me-2">Return to Inbox</a>
-            <a href="{% url 'account_logout' %}"
-               class="btn btn-outline-danger btn-sm">Logout</a>
-          {% else %}
-            <span class="me-3">You are not logged in</span>
-            <a href="{% url 'account_login' %}"
-               class="btn btn-outline-primary btn-sm">Login</a>
-          {% endif %}
+  <!-- Bootstrap JS bundle (for dropdown functionality) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <nav class="navbar navbar-expand-lg shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">UVA Trading App</a>
+            <div class="d-flex align-items-center">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Hello, <strong>{{ user.username|capfirst }}</strong>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a>
+                        </li>
+                        <li><a class="dropdown-item" href="{% url 'inbox' %}">Inbox</a></li>
+                        {% if user.is_authenticated and user.is_staff %}
+                        <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Moderator Dashboard</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
-      </div>
     </nav>
+  <body class="bg-light">
     <div class="container py-4">
       <h1 class="mb-4">Chat with {{ other_user.username }}</h1>
       <div class="messages-box">

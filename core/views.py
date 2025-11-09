@@ -83,18 +83,19 @@ def post_create(request):
 
 @login_required
 def edit_profile(request, username):
-    user = request.user
-
+    user = request.user    
     if username != user.username:
         return HttpResponseForbidden("You can only edit your own profile")
 
     if request.method == "POST":
-        form = ProfileForm(request.POST, instance=user.profile)
+        form = ProfileForm(request.POST, instance=user.profile, user_instance=user)
+        print("DEBUG username initial:", form.fields['username'].initial)
         if form.is_valid():
             form.save()
             return redirect("user_profile", username=user.username)
     else:
-        form = ProfileForm(instance=user.profile)
+        form = ProfileForm(instance=user.profile, user_instance=user)
+    
     
     return render(
         request,
