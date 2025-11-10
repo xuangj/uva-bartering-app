@@ -1,9 +1,11 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from django.shortcuts import redirect, render
+from django.http import HttpResponse, HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import PostForm, ProfileForm
-from .models import Post, Profile
+
+from .forms import PostForm, ProfileForm, TradeForm
+from .models import Post, Profile, Trade
+from django.db.models import Q
 
 # --- Pages --- #
 
@@ -84,6 +86,33 @@ def post_create(request):
 
 
 @login_required
+def view_post(request, post_id: int) -> HttpResponse:
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+
+    # Check if current user already made an offer for this listing/post
+    existing_trade = Trade.objects.filter(
+        item_requested=post, userOne=user
+    ).first() # Returns none if no trades exist
+
+    # display trade form if haven't made offer
+    if request.method == "POST":
+        form = TradeForm(request.POST)
+        if form.is_valid():
+            trade = form.save(commit=False)
+            trade.userOne = request.user
+            trade.userTwo = post.poster
+            trade.item_requested = post
+            trade.save()
+            return redirect("active_trades")
+    else:
+        form = TradeForm()
+
+    return render(request, "post.html", {'post': post, 'form': form, 'existing_trade': existing_trade})
+
+
+
+@login_required
 def edit_profile(request, username):
     user = request.user
 
@@ -103,3 +132,29 @@ def edit_profile(request, username):
         "profile.html",
         {"form": form, "user": user},
     )
+
+
+@login_required
+def active_trades(request):
+    trades = Trade.objects.filter(
+        status='Pending'
+    ).filter(
+        Q(userOne=request.user) | Q(userTwo=request.user)
+    )
+    return render(request, "active_trades.html", {"trades": trades})
+
+
+@login_required
+def accept_trade(request, trade_id):
+    trade = get_object_or_404(Trade, id=trade_id, userTwo=request.user)
+    trade.status = 'Accepted'
+    trade.save()
+    return redirect('active_trades')
+
+
+@login_required
+def deny_trade(request, trade_id):
+    trade = get_object_or_404(Post, id=trade_id, userTwo=request.user)
+    trade.status = 'Denied'
+    trade.save()
+    return redirect('active_trades')

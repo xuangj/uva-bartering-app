@@ -49,12 +49,31 @@ class Profile(models.Model):
     
 
 class Post(models.Model):
-    poster = models.ForeignKey(User, on_delete=models.CASCADE)
+    poster = models.ForeignKey(User, on_delete=models.CASCADE, related_name="userOne")
     title = models.CharField(max_length=100)
+    item_offered = models.CharField(max_length=100)
     description = models.TextField()
     image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
-    
+        return f"{self.title} from {self.poster.username}"
+
+
+class Trade(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Accepted', 'Accepted'),
+        ('Denied', 'Denied'),
+    ]
+
+    userOne = models.ForeignKey(User, on_delete=models.CASCADE, related_name="poster")
+    userTwo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="userTwo")
+    item_offered = models.CharField(max_length=100)
+    item_requested = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="item_requested")
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    comment = models.TextField()
+
+    def __str__(self):
+        return f"{self.userOne.username} to {self.userTwo.username}"

@@ -114,7 +114,7 @@
                               height: 200px" />
                 {% endif %}
                 <div class="card-body">
-                  <h5 class="card-title">{{ post.title }}</h5>
+                  <a href="{% url 'view_post' post_id=post.id %}" class="card-title">{{ post.title }}</a>
                   <p class="card-text">{{ post.description|truncatechars:120 }}</p>
                 </div>
                 <div class="card-footer text-muted">
