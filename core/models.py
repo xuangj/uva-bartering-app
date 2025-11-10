@@ -56,6 +56,8 @@ class Post(models.Model):
         ('Furniture','Furniture'),
         ('Food','Food'),
         ('First-year','First-year'),
+        ('Swag','Swag'),
+        ('Plants','Plants'),
         ('Miscellaneous', 'Miscellaneous'),
     ]
 
