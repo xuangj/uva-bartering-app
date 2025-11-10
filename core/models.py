@@ -49,10 +49,20 @@ class Profile(models.Model):
     
 
 class Post(models.Model):
+    CATEGORY = [
+        ('Electronics','Electronics'),
+        ('Books','Books'),
+        ('Clothing','Clothing'),
+        ('Furniture','Furniture'),
+        ('Miscellaneous', 'Miscellaneous'),
+    ]
+
+    
     poster = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     description = models.TextField()
     image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
+    interest = models.CharField(max_length=50, choices=CATEGORY, default='Miscellaneous')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
