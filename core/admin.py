@@ -4,7 +4,6 @@ from .models import Post, Profile, SustainabilityInterests, TradingInterests, Tr
 
 admin.site.register(Profile)
 admin.site.register(Post)
-admin.site.register(Trade)
 
 # Each row in admin shows all profiles that have this sustainability interest
 @admin.register(SustainabilityInterests)
@@ -24,3 +23,8 @@ class TradingInterestsAdmin(admin.ModelAdmin):
         return ", ".join([p.user.username for p in obj.profile_set.all()])
     users_list.short_description = "Users"
 
+
+@admin.register(Trade)
+class TradeAdmin(admin.ModelAdmin):
+    list_display = ("id", "userOne", "userTwo", "item_offered", "item_requested", "status" )
+    list_filter = ("created_at",)

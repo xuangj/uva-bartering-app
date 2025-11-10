@@ -12,8 +12,8 @@
 
     <div class="container py-4">
       <h1 class="mb-4">Chat with {{ other_user.username }}</h1>
-      {% if trades %}
-        {% for trade in trades %}
+      {% if pending_trades %}
+        {% for trade in pending_trades %}
           <div class="alert alert-info mt-4">
             {% if trade.userOne == request.user %}
               You offered {{ trade.item_offered }} to <strong>{{ trade.userTwo.username }}</strong>

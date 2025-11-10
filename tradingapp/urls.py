@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
-from core.views import home, login_redirect_view, moderator_dashboard, post_create, user_profile, edit_profile, my_trades, view_post, accept_trade, deny_trade
+from core.views import home, login_redirect_view, moderator_dashboard, post_create, user_profile, edit_profile, my_trades, view_post, accept_trade, deny_trade, delete_trade_offer
 from messaging.views import chat, get_or_create_dm_thread, inbox, start_chat
 
 urlpatterns = [
@@ -22,4 +22,5 @@ urlpatterns = [
     path("trades/active/", my_trades, name="my_trades"),
     path("trades/<int:trade_id>/accept/", accept_trade, name="accept_trade"),
     path("trades/<int:trade_id>/deny/", deny_trade, name="deny_trade"),
+    path("trades/<int:trade_id>/delete/", delete_trade_offer, name="delete_trade_offer"),
 ]

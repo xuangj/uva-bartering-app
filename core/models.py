@@ -49,7 +49,7 @@ class Profile(models.Model):
     
 
 class Post(models.Model):
-    poster = models.ForeignKey(User, on_delete=models.CASCADE, related_name="userOne")
+    poster = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     title = models.CharField(max_length=100)
     item_offered = models.CharField(max_length=100)
     description = models.TextField()
@@ -67,8 +67,8 @@ class Trade(models.Model):
         ('Denied', 'Denied'),
     ]
 
-    userOne = models.ForeignKey(User, on_delete=models.CASCADE, related_name="poster")
-    userTwo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="userTwo")
+    userOne = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_initiated")
+    userTwo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_received")
     item_offered = models.CharField(max_length=100)
     item_requested = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="item_requested")
     created_at = models.DateTimeField(auto_now_add=True)

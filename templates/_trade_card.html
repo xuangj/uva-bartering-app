@@ -25,7 +25,7 @@
                     </div>
 
                     <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
-                        {% if trade.userTwo == request.user and trade.status == 'Pending' %}
+                        {% if trade.status == 'Pending' %}
                         <div class="btn-group" role="group">
                             <a href="{% url 'accept_trade' trade.id %}" class="btn btn-sm btn-success">
                                 <i class="bi bi-check-circle"></i> Accept
@@ -34,12 +34,18 @@
                             <a href="{% url 'deny_trade' trade.id %}" class="btn btn-sm btn-outline-danger">
                                 <i class="bi bi-x-circle"></i> Deny
                             </a>
+
+                            <a href="{% url 'delete_trade_offer' trade.id %}" class="btn btn-sm btn-dark btn-outline-danger"
+                                onclick="return confirm('Do you want to delete this trade offer?');">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
                         </div>
                         {% endif %}
 
                         <a href="{% url 'start_chat' trade.userTwo.id %}" class="btn btn-sm btn-primary">
                                 <i class="bi bi-chat-dots"></i> Message
                         </a>
+                        
                     </div>
                 </div>
             </div>

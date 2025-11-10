@@ -8,6 +8,7 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ["title", "description", "image"]
 
+
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
@@ -17,6 +18,7 @@ class ProfileForm(forms.ModelForm):
             "sustainability_interests": forms.CheckboxSelectMultiple,
             "trading_interests": forms.CheckboxSelectMultiple,
         }
+
 
 class TradeForm(forms.ModelForm):
     class Meta:

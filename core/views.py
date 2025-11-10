@@ -104,13 +104,14 @@ def view_post(request, post_id: int) -> HttpResponse:
             trade.userTwo = post.poster
             trade.item_requested = post
             trade.save()
-            return redirect("active_trades")
+            return redirect("my_trades")
     else:
         form = TradeForm()
 
     return render(request, "post.html", {'post': post, 'form': form, 'existing_trade': existing_trade})
 
 
+# --- Profile --- #
 
 @login_required
 def edit_profile(request, username):
@@ -134,6 +135,8 @@ def edit_profile(request, username):
     )
 
 
+# --- Trades --- #
+
 @login_required
 def my_trades(request):
     user = request.user
@@ -153,7 +156,7 @@ def my_trades(request):
         status='Denied'
     )
 
-    return render(request, "active_trades.html", {"pending_trades": pending_trades, "accepted_trades": accepted_trades, "denied_trades": denied_trades})
+    return render(request, "my_trades.html", {"pending_trades": pending_trades, "accepted_trades": accepted_trades, "denied_trades": denied_trades})
 
 
 @login_required
@@ -161,12 +164,20 @@ def accept_trade(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id, userTwo=request.user)
     trade.status = 'Accepted'
     trade.save()
-    return redirect('active_trades')
+    return redirect('my_trades')
 
 
 @login_required
 def deny_trade(request, trade_id):
-    trade = get_object_or_404(Post, id=trade_id, userTwo=request.user)
+    trade = get_object_or_404(Trade, id=trade_id, userTwo=request.user)
     trade.status = 'Denied'
     trade.save()
-    return redirect('active_trades')
+    return redirect('my_trades')
+
+
+@login_required
+def delete_trade_offer(request, trade_id):
+    trade = get_object_or_404(Trade,id=trade_id, userOne=request.user)
+
+    trade.delete()
+    return redirect("my_trades")
