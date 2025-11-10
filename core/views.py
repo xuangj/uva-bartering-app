@@ -135,13 +135,25 @@ def edit_profile(request, username):
 
 
 @login_required
-def active_trades(request):
-    trades = Trade.objects.filter(
+def my_trades(request):
+    user = request.user
+
+    pending_trades = Trade.objects.filter(
+        Q(userOne=request.user) | Q(userTwo=request.user),
         status='Pending'
-    ).filter(
-        Q(userOne=request.user) | Q(userTwo=request.user)
     )
-    return render(request, "active_trades.html", {"trades": trades})
+
+    accepted_trades = Trade.objects.filter(
+        Q(userOne=request.user) | Q(userTwo=request.user),
+        status='Accepted'
+    )
+
+    denied_trades = Trade.objects.filter(
+        Q(userOne=request.user) | Q(userTwo=request.user),
+        status='Denied'
+    )
+
+    return render(request, "active_trades.html", {"pending_trades": pending_trades, "accepted_trades": accepted_trades, "denied_trades": denied_trades})
 
 
 @login_required

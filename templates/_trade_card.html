@@ -1,0 +1,45 @@
+<div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {% if trade.userOne == request.user %} 
+                                Offered to <strong>{{ trade.userTwo.username }}</strong>
+                            {% else %}
+                                Offered from <strong>{{ trade.userOne.username }}</strong>
+                            {% endif %}
+                        </h5>
+
+                        <p class="card-text mb-2">
+                            <strong> Item Offered:</strong> {{ trade.item_offered }}<br />
+                            <strong> Item Requested:</strong> {{ trade.item_requested }}
+                        </p>
+
+                        <span
+                            class="badge
+                                {% if trade.status == 'Pending' %}bg-warning text-dark
+                                {% elif trade.status == 'Accepted' %}bg-success
+                                {% elif trade.status == 'Denied' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                            {{ trade.status|capfirst }}
+                        </span>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
+                        {% if trade.userTwo == request.user and trade.status == 'Pending' %}
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'accept_trade' trade.id %}" class="btn btn-sm btn-success">
+                                <i class="bi bi-check-circle"></i> Accept
+                            </a>
+
+                            <a href="{% url 'deny_trade' trade.id %}" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-x-circle"></i> Deny
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        <a href="{% url 'start_chat' trade.userTwo.id %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-chat-dots"></i> Message
+                        </a>
+                    </div>
+                </div>
+            </div>

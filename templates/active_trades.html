@@ -11,93 +11,69 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg shadow-sm">
-      <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">UVA Trading App</a>
-        <div class="d-flex align-items-center">
-          <!-- Dropdown -->
-          {% if user.is_authenticated %}
-            <div class="dropdown">
-              <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                      data-bs-toggle="dropdown" aria-expanded="false">
-                Hello, <strong>{{ user.username|capfirst }}</strong>
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a></li>
-                <li><a class="dropdown-item" href="{% url 'inbox' %}">Inbox</a></li>
-                <li><a class="dropdown-item" href="{% url 'active_trades' %}">Active Trades</a></li>
-                {% if user.is_authenticated and user.is_staff %}
-                  <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Moderator Dashboard</a></li>
-                {% endif %}
-                <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
-              </ul>
-            </div>
-          {% else %}
-            <span class="me-3">You are not logged in</span>
-            <a href="{% url 'account_login' %}"
-               class="btn btn-outline-primary btn-sm">Login</a>
-          {% endif %}
-        </div>
-      </div>
-    </nav>
+    {% include '_navbar.html'%}
 
     <div class="container mt-4">
-        <h2> Your Active Trades </h2>
+        <h2> My Trades </h2>
 
-        {% if trades %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for trade in trades %}
-            <div class="col">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            {% if trade.userOne == request.user %} 
-                                Offered to <strong>{{ trade.userTwo.username }}</strong>
-                            {% else %}
-                                Offered from <strong>{{ trade.userOne.username }}</strong>
-                            {% endif %}
-                        </h5>
+        <ul class="nav nav-tabs" id="tradeTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
+                    Pending
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted" type="button" role="tab" aria-controls="accepted" aria-selected="true">
+                    Accepted
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="denied-tab" data-bs-toggle="tab" data-bs-target="#denied" type="button" role="tab" aria-controls="denied" aria-selected="true">
+                    Denied
+                </button>
+            </li>
+        </ul>
 
-                        <p class="card-text mb-2">
-                            <strong> Item Offered:</strong> {{ trade.item_offered }}<br />
-                            <strong> Item Requested:</strong> {{ trade.item_requested }}
-                        </p>
-
-                        <span
-                            class="badge
-                                {% if trade.status == 'Pending' %}bg-warning text-dark
-                                {% elif trade.status == 'Accepted' %}bg-success
-                                {% elif trade.status == 'Denied' %}bg-danger
-                                {% else %}bg-secondary{% endif %}">
-                            {{ trade.status|capfirst }}
-                        </span>
-                    </div>
-
-                    <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
-                        {% if trade.userTwo == request.user and trade.status == 'Pending' %}
-                        <div class="btn-group" role="group">
-                            <a href="{% url 'accept_trade' trade.id %}" class="btn btn-sm btn-success">
-                                <i class="bi bi-check-circle"></i> Accept
-                            </a>
-
-                            <a href="{% url 'deny_trade' trade.id %}" class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-x-circle"></i> Deny
-                            </a>
-                        </div>
-                        {% endif %}
-
-                        <a href="{% url 'start_chat' trade.userTwo.id %}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-chat-dots"></i> Message
-                        </a>
-                    </div>
+        <div class="tab-content mt-3" id="tradesTabsContent">
+            <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                {% if pending_trades %}
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for trade in pending_trades %}
+                        {% include '_trade_card.html' with trade=trade %}
+                    {% endfor %}
                 </div>
+                {% else %}
+                    <div class="alert alert-info mt-4">No pending trades</div>
+                {% endif %}
             </div>
-            {% endfor %}
+
+            <div class="tab-pane fade" id="accepted" role="tabpanel" aria-labelledby="accepted-tab">
+                {% if accepted_trades %}
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for trade in accepted_trades %}
+                        {% include '_trade_card.html' with trade=trade %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                    <div class="alert alert-info mt-4">No accepted trades</div>
+                {% endif %}
+            </div>
+
+            <div class="tab-pane fade" id="denied" role="tabpanel" aria-labelledby="denied-tab">
+                {% if denied_trades %}
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for trade in denied_trades %}
+                        {% include '_trade_card.html' with trade=trade %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                    <div class="alert alert-info mt-4">No denied trades</div>
+                {% endif %}
+            </div>
+
+
         </div>
-        {% else %}
-        <div class="alert alert-info mt-4">No active trades currently.</div>
-        
-        {% endif %}
+    
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
