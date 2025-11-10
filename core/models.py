@@ -54,6 +54,8 @@ class Post(models.Model):
         ('Books','Books'),
         ('Clothing','Clothing'),
         ('Furniture','Furniture'),
+        ('Food','Food'),
+        ('First-year','First-year'),
         ('Miscellaneous', 'Miscellaneous'),
     ]
 
@@ -62,7 +64,8 @@ class Post(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
-    interest = models.CharField(max_length=50, choices=CATEGORY, default='Miscellaneous')
+    category = models.CharField(max_length=50, choices=CATEGORY, default='Miscellaneous')
+    price = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

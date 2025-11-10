@@ -13,12 +13,30 @@ def home(request):
     """Render homepage with all posts (and optional search filters)."""
     posts = Post.objects.all().order_by("-created_at")
 
-    # Filter
+
+    # Category Filter
+    catergory_filter = request.GET.get("category")
+    name_search = request.GET.get("name")
+    price_min = request.GET.get("price_min")
+    price_max = request.GET.get("price_max")
+
+    if catergory_filter:
+        posts = posts.filter(category=catergory_filter)
+    if name_search:
+        posts = posts.filter(title__icontains=name_search)
+    if price_min and price_min.isdigit(): # Ensure input is valid before filtering
+        posts = posts.filter(price__gte=price_min)
+    if price_max and price_max.isdigit(): # Ensure input is valid before filtering
+        posts = posts.filter(price__lte=price_max)    
+    context = {
+        'posts': posts,
+        'categories': Post.CATEGORY,
+    }
     name_query = request.GET.get("name")
     if name_query:
         posts = posts.filter(title__icontains=name_query)
 
-    return render(request, "home.html", {"posts": posts})
+    return render(request, "home.html", context)
 
 
 # Handle default login
