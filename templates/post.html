@@ -71,6 +71,7 @@
                             <p><strong>Comments:</strong></p>
                         {% endif %}
                         <p><strong>Status:</strong>{{ existing_trade.status }}</p>
+                        <a href="{% url 'start_chat' post.poster.id %}" class="btn btn-info">Check in with {{ post.poster.username }} about this trade</a>
                     {% else %}
                     <h4>Propose an offer for this listing:</h4>
                     <form method="POST">
