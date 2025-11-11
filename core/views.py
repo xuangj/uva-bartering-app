@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -6,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import PostForm, ProfileForm, TradeForm
 from .models import Post, Profile, Trade
 from django.db.models import Q
+from messaging.views import get_or_create_dm_thread
 
 # --- Pages --- #
 
@@ -13,8 +15,7 @@ from django.db.models import Q
 # Render listings page
 def home(request):
     """Render homepage with all posts (and optional search filters)."""
-    posts = Post.objects.all().order_by("-created_at")
-
+    posts = Post.objects.filter(available=True).order_by("-created_at")
     # Filter
     name_query = request.GET.get("name")
     if name_query:
@@ -161,9 +162,19 @@ def my_trades(request):
 
 @login_required
 def accept_trade(request, trade_id):
-    trade = get_object_or_404(Trade, id=trade_id, userTwo=request.user)
+    trade = get_object_or_404(Trade, id=trade_id)
+
+    if trade.item_requested.poster != request.user:
+        return HttpResponseForbidden("You're not the OP, you cannot accept this offer")
+    
     trade.status = 'Accepted'
     trade.save()
+
+    trade.item_requested.available = False
+    trade.item_requested.save() 
+
+    messages.success(request, "Trade Accepted!", extra_tags="trade")
+
     return redirect('my_trades')
 
 
