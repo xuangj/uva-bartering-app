@@ -13,6 +13,7 @@
 <body>
     {% include '_navbar.html'%}
 
+    <!--Display system messages-->
     {% if messages %}
         {% for message in messages %}
             {% if "trade" in message.tags %}
@@ -28,6 +29,7 @@
     <div class="container mt-4">
         <h2> My Trades </h2>
 
+        <!--Tabs-->
         <ul class="nav nav-tabs" id="tradeTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
@@ -48,6 +50,7 @@
 
         <div class="tab-content mt-3" id="tradesTabsContent">
             <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                <!--Pending Trades-->
                 {% if pending_trades %}
                 <div class="row row-cols-1 row-cols-md-3 g-4">
                     {% for trade in pending_trades %}
@@ -58,7 +61,8 @@
                     <div class="alert alert-info mt-4">No pending trades</div>
                 {% endif %}
             </div>
-
+            
+            <!--Accepted Trades-->
             <div class="tab-pane fade" id="accepted" role="tabpanel" aria-labelledby="accepted-tab">
                 {% if accepted_trades %}
                 <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -71,6 +75,7 @@
                 {% endif %}
             </div>
 
+            <!--Denied Trades-->
             <div class="tab-pane fade" id="denied" role="tabpanel" aria-labelledby="denied-tab">
                 {% if denied_trades %}
                 <div class="row row-cols-1 row-cols-md-3 g-4">

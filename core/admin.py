@@ -3,7 +3,13 @@ from django.contrib import admin
 from .models import Post, Profile, SustainabilityInterests, TradingInterests, Trade
 
 admin.site.register(Profile)
-admin.site.register(Post)
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ("title", "poster", "item_offered", "description", "created_at", "is_available")
+
+    list_filter = ("created_at",)
+
 
 # Each row in admin shows all profiles that have this sustainability interest
 @admin.register(SustainabilityInterests)
@@ -26,5 +32,5 @@ class TradingInterestsAdmin(admin.ModelAdmin):
 
 @admin.register(Trade)
 class TradeAdmin(admin.ModelAdmin):
-    list_display = ("id", "userOne", "userTwo", "item_offered", "item_requested", "status" )
+    list_display = ("id", "userOne", "userTwo", "item_offered", "item_requested", "status", "post_reference" )
     list_filter = ("created_at",)

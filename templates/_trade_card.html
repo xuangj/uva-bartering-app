@@ -2,10 +2,11 @@
     <div class="card h-100 shadow-sm border-0">
         <div class="card-body">
             <h5 class="card-title">
+                <!--Link card to individual Trade page-->
                 {% if trade.userOne == request.user %} 
-                    Offered to <strong>{{ trade.userTwo.username }}</strong>
+                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered to <strong>{{ trade.userTwo.username }}</strong></a>
                 {% else %}
-                    Offered from <strong>{{ trade.userOne.username }}</strong>
+                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered from <strong>{{ trade.userOne.username }}</strong></a>
                 {% endif %}
             </h5>
 
@@ -14,6 +15,7 @@
                 <strong> Item Requested:</strong> {{ trade.item_requested }}
             </p>
 
+            <!--Display trade status-->
             <span
                 class="badge
                     {% if trade.status == 'Pending' %}bg-warning text-dark
@@ -23,10 +25,12 @@
                 {{ trade.status|capfirst }}
             </span>
         </div>
-
+        
+        <!--Btn options for trade actions-->
         <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
             {% if trade.status == 'Pending' %}
             <div>
+                <!--OP can accept or deny offer-->
                 {% if trade.item_requested.poster == request.user %}
                     <a href="{% url 'accept_trade' trade.id %}" class="btn btn-sm btn-success me-2">
                         <i class="bi bi-check-circle"></i> Accept
@@ -35,6 +39,7 @@
                     <a href="{% url 'deny_trade' trade.id %}" class="btn btn-sm btn-outline-danger ms-2">
                         <i class="bi bi-x-circle"></i> Deny
                     </a>
+                <!--Rescind trade offer (non-OP action)-->
                 {% else %}
                     <a href="{% url 'delete_trade_offer' trade.id %}" class="btn btn-sm btn-dark btn-outline-danger"
                         onclick="return confirm('Do you want to take back this trade offer?');">

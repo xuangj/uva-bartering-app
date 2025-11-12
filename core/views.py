@@ -15,7 +15,7 @@ from messaging.views import get_or_create_dm_thread
 # Render listings page
 def home(request):
     """Render homepage with all posts (and optional search filters)."""
-    posts = Post.objects.filter(available=True).order_by("-created_at")
+    posts = Post.objects.filter(is_available=True).order_by("-created_at")
     # Filter
     name_query = request.GET.get("name")
     if name_query:
@@ -104,6 +104,7 @@ def view_post(request, post_id: int) -> HttpResponse:
             trade.userOne = request.user
             trade.userTwo = post.poster
             trade.item_requested = post
+            trade.post_reference = post
             trade.save()
             return redirect("my_trades")
     else:
@@ -139,7 +140,7 @@ def edit_profile(request, username):
 # --- Trades --- #
 
 @login_required
-def my_trades(request):
+def my_trades(request) -> HttpResponse:
     user = request.user
 
     pending_trades = Trade.objects.filter(
@@ -159,6 +160,14 @@ def my_trades(request):
 
     return render(request, "my_trades.html", {"pending_trades": pending_trades, "accepted_trades": accepted_trades, "denied_trades": denied_trades})
 
+@login_required
+def view_trade(request, trade_id: int) -> HttpResponse:
+    trade = get_object_or_404(Trade, id=trade_id)
+    post = trade.post_reference
+    user = request.user
+
+    return render(request, "trade.html", {'trade': trade, 'post': post})
+
 
 @login_required
 def accept_trade(request, trade_id):
@@ -168,9 +177,7 @@ def accept_trade(request, trade_id):
         return HttpResponseForbidden("You're not the OP, you cannot accept this offer")
     
     trade.status = 'Accepted'
-    trade.save()
-
-    trade.item_requested.available = False
+    trade.item_requested.is_available = False
     trade.item_requested.save() 
 
     messages.success(request, "Trade Accepted!", extra_tags="trade")

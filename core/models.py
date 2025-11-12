@@ -55,7 +55,7 @@ class Post(models.Model):
     description = models.TextField()
     image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    available = models.BooleanField(default=True)
+    is_available = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.title} from {self.poster.username}"
@@ -70,8 +70,17 @@ class Trade(models.Model):
 
     userOne = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_initiated")
     userTwo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_received")
+    
+    post_reference = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
     item_offered = models.CharField(max_length=100)
     item_requested = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="item_requested")
+    image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     comment = models.TextField()
