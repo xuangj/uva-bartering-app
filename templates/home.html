@@ -73,11 +73,12 @@
         <div class="col-md-2">
           <label for="category" class="form-label">Category</label>
           <select name="category" id="category" class="form-select">
-            <option value="">All</option>
-            <option value="electronics">Electronics</option>
-            <option value="books">Books</option>
-            <option value="clothing">Clothing</option>
-            <option value="furniture">Furniture</option>
+            <option value="" {% if not request.GET.category %}selected{% endif %}>All</option>
+            {% for choice_value, choice_label in categories %}
+              <option value="{{ choice_value }}"{% if request.GET.category == choice_value %}selected{% endif %}>
+                  {{ choice_label }}
+              </option>
+            {% endfor %}
           </select>
         </div>
         <div class="col-md-2">
@@ -115,6 +116,8 @@
                 {% endif %}
                 <div class="card-body">
                   <h5 class="card-title">{{ post.title }}</h5>
+                  <p>Category: <strong>{{ post.category }}</strong></p>
+                  <p>Price: <strong>${{ post.price }}</strong></p>
                   <p class="card-text">{{ post.description|truncatechars:120 }}</p>
                 </div>
                 <div class="card-footer text-muted">
