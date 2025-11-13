@@ -146,12 +146,16 @@ def delete_post(request, post_id: int):
     if Trade.objects.filter(item_requested=post, status='Accepted').exists():
         return HttpResponseForbidden("You can't delete a post after it's been traded.")
     
-    if post.poster != request.user:
-        return HttpResponseForbidden("You can only delete your own posts.")
-    
-    post.delete()
-    return redirect("home")
+    if request.user.is_superuser:
+        post.delete()
+        return redirect("home")
 
+    if post.poster == request.user:
+        post.delete()
+        return redirect("home")    
+
+    return HttpResponseForbidden("You can only delete your own posts")
+        
 
 # --- Profile --- #
 

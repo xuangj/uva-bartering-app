@@ -91,10 +91,16 @@
                   <a href="{% url 'view_post' post_id=post.id %}" class="card-title">{{ post.title }}</a>
                   <p class="card-text">{{ post.description|truncatechars:120 }}</p>
                 </div>
-                <div class="card-footer text-muted">
-                  Posted by <strong>{{ post.poster.username }}</strong>
-                  <br />
-                  {{ post.created_at|date:"M d, Y" }}
+                <div class="card-footer text-muted d-flex justify-content-between align-items-center">
+                  <div>
+                    Posted by <strong> {{ post.poster.username }}</strong><br />
+                    {{ post.created_at|date:"M d, Y" }}
+                  </div>
+                  {% if user.is_authenticated and user.is_superuser %}
+                    <a href="{% url 'delete_post' post.id %}" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash"></i> Delete
+                    </a>
+                  {% endif %}
                 </div>
               </div>
             </div>
