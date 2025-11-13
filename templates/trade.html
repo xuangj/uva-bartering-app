@@ -21,35 +21,33 @@
         <div class="alert alert-secondary mt-3">This trade transaction has already been completed.</div>
     {% endif %}
 
-    <div class="container">
-        <div class="row">
-            <div class="col-1"></div>
+    <div class="container mt-3">
+        <div class="row justify-content-center">
             <div class="col-4">
-                <div class="card listing-card">
+                <div class="card listing-card border-warning border-2">
                     {% if post.image %}
                         <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
                     {% endif %}
                     <div class="card-body">
-                        <h3 class="post-title">For: {{  post.title }}</h3>
+                        <h3 class="post-title">Original listing: {{  post.title }}</h3>
                         <h5 class="poster">{{ post.poster }}</h5>
                         <p class="post-description">{{ post.description }}</p>
                     </div>
                 </div>
             </div>
-            <div class="col-2"></div>
+
             <div class="col-4">
-                <div class="card trade-offer-card">
+                <div class="card trade-offer-card border-primary border-2">
                     {% if trade.image %}
                         <img src="{{ trade.image.url }}" class="card-img-top" alt="{{ trade.item_offered }}">
                     {% endif %}
                     <div class="card-body">
-                        <h3 class="offer-title">Offered: {{  trade.item_offered }}</h3>
+                        <h3 class="offer-title">Trade offered: {{  trade.item_offered }}</h3>
                         <h5 class="offerer">{{ trade.userOne }}</h5>
                         <p class="trade-comment">{{ trade.comment }}</p>
                     </div>
                 </div>
             </div>
-            <div class="col-1"></div>
 
         </div>
     </div>

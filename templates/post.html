@@ -13,12 +13,11 @@
 <body>
     {% include '_navbar.html'%}
 
-    {% if not post.available %}
-        <div class="alert alert-secondary mt-3">This item has already been traded.</div>
-    {% endif %}
-
     <div class="container">
         <div class="row">
+                {% if not post.is_available %}
+                    <div class="alert alert-secondary mt-3">This item has already been traded.</div>
+                {% endif %}
             <div class="post-img md-3">
                 {% if post.img %} 
                 <img src="{{ post.image.url }}"
@@ -29,16 +28,34 @@
             </div>
         </div>
 
-        <div class="post-content row mt-3">
-            <div class="col-sm mt-2">
-                <h2 class="post-title">{{ post.title }}</h2>
+        <div class="post-content row mt-3 justify-content-center">
+            <div class="col-5 mt-2">
+                <h2 class="post-title"><strong>{{ post.title }}</strong></h2>
+                <h6>Posted by 
+                {% if request.user == post.poster %}
+                    <strong>You</strong></h6> <br />
+                    {{ post.created_at|date:"M d, Y" }} <br />
+                    <a href="{% url 'delete_post' post.id %}" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash"></i> Delete Post
+                    </a>
+                {% else %}  
+                    <strong>{{ post.poster.username }}</strong></h6>
+                    {{ post.created_at|date:"M d, Y" }} <br />
+                    <a href="{% url 'start_chat' post.poster.id %}" class="btn btn-md btn-primary mt-3">
+                        <i class="bi bi-chat-dots"></i> Message
+                    </a> <br />
+                {% endif %}
+                <h5 class="mt-3">Description</h5>
                 <p class="post-description">{{ post.description }}</p>
-                <h5>Posted by <strong>{{ post.poster.username }}</strong></h5> <br />
-                {{ post.created_at|date:"M d, Y" }}
+                
             </div>
-            <div class="col-sm mt-2">
-                {% if post.poster.username == user.username %}
-                    <h4>This is your listing. Check your Active Trades to view incoming offers!</h4>
+            <div class="col-5 mt-2">
+                {% if request.user == post.poster %}
+                    <h5>This is your listing. Check your Active Trades to view incoming offers!</h5>
+                    <a href="{% url 'edit_post' post.id %}" class="btn btn-warning ">
+                        <i class="bi bi-pencil"></i> Edit Post
+                    </a>
+
                 {% else %}
                     {% if existing_trade %}
                         <h4> Your offer for this post:</h4>
@@ -49,7 +66,7 @@
                         <p><strong>Status:</strong>{{ existing_trade.status }}</p>
                         <a href="{% url 'start_chat' post.poster.id %}" class="btn btn-info">Check in with {{ post.poster.username }} about this trade</a>
                     {% else %}
-                    <h4>Propose an offer for this listing:</h4>
+                    <h4>Make an offer for this listing:</h4>
                     <form method="POST">
                         {% csrf_token %}
                         {{ form.as_p }}

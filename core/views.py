@@ -83,7 +83,7 @@ def post_create(request):
         form = PostForm()
 
     # Render the template
-    return render(request, "post_form.html", {"form": form})
+    return render(request, "post_form.html", {"form": form, "is_edit": False})
 
 
 @login_required
@@ -113,6 +113,46 @@ def view_post(request, post_id: int) -> HttpResponse:
     return render(request, "post.html", {'post': post, 'form': form, 'existing_trade': existing_trade})
 
 
+# Edits existing post
+@login_required
+def edit_post(request, post_id: int):
+    post = get_object_or_404(Post, id=post_id)
+
+    if Trade.objects.filter(item_requested=post, status='Accepted').exists():
+        return HttpResponseForbidden("You can't edit a post after it's been traded.")
+    
+    if post.poster != request.user:
+        return HttpResponseForbidden("You can only edit your own posts.")
+    
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            edited_post = form.save(commit=False)
+            edited_post.poster = post.poster
+            edited_post.save()
+            messages.success(request, "Post updated successfully!")
+            return redirect("view_post", post_id=post.id)
+    else:
+        form = PostForm(instance=post)
+
+    return render(request, "post_form.html", {"form": form, "is_edit": True})
+
+
+# Delete post
+@login_required
+def delete_post(request, post_id: int):
+    post = get_object_or_404(Post, id=post_id)
+
+    if Trade.objects.filter(item_requested=post, status='Accepted').exists():
+        return HttpResponseForbidden("You can't delete a post after it's been traded.")
+    
+    if post.poster != request.user:
+        return HttpResponseForbidden("You can only delete your own posts.")
+    
+    post.delete()
+    return redirect("home")
+
+
 # --- Profile --- #
 
 @login_required
@@ -139,6 +179,7 @@ def edit_profile(request, username):
 
 # --- Trades --- #
 
+# See all active trades (offers and listings)
 @login_required
 def my_trades(request) -> HttpResponse:
     user = request.user
@@ -160,6 +201,8 @@ def my_trades(request) -> HttpResponse:
 
     return render(request, "my_trades.html", {"pending_trades": pending_trades, "accepted_trades": accepted_trades, "denied_trades": denied_trades})
 
+
+# view individual trade, see original post and possible offer
 @login_required
 def view_trade(request, trade_id: int) -> HttpResponse:
     trade = get_object_or_404(Trade, id=trade_id)
@@ -169,6 +212,7 @@ def view_trade(request, trade_id: int) -> HttpResponse:
     return render(request, "trade.html", {'trade': trade, 'post': post})
 
 
+# OP can accept trade offer
 @login_required
 def accept_trade(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id)
@@ -185,6 +229,7 @@ def accept_trade(request, trade_id):
     return redirect('my_trades')
 
 
+# OP can decline trade offer
 @login_required
 def deny_trade(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id, userTwo=request.user)
@@ -193,6 +238,7 @@ def deny_trade(request, trade_id):
     return redirect('my_trades')
 
 
+# Offerer can rescind their offer
 @login_required
 def delete_trade_offer(request, trade_id):
     trade = get_object_or_404(Trade,id=trade_id, userOne=request.user)

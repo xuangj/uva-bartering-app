@@ -2,14 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Create a New Post</title>
+    <title>{% if is_edit %}Edit Your Post{% else %}Create a New Post{% endif %}</title>
   </head>
+
   <body>
-    <h1>Post a New Item for Trade</h1>
+    {% if is_edit %}
+      <h1>Edit your post</h1>
+    {% else %}
+      <h1>Post a New Item for Trade</h1>
+    {% endif %}
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       {{ form.as_p }}
-      <button type="submit">Publish Post</button>
+      <button type="submit">
+        {% if is_edit %}Save Changes
+        {% else %} Publish Post
+        {% endif %}
+      </button>
     </form>
     {% if form.errors %}
       <div style="color: red;">
