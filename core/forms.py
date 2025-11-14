@@ -1,3 +1,5 @@
+# core/forms.py
+
 from django import forms
 
 from .models import Post, Profile, Trade, Report
@@ -5,8 +7,11 @@ from .models import Post, Profile, Trade, Report
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "description", "image", "category","price","general_size","weight","clothing_size"]
+        fields = ["title", "description", "category", "general_size", "weight", "clothing_size", "price", "image"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["image"].required = True
 
 class ProfileForm(forms.ModelForm):
     username = forms.CharField(max_length=150, required=True) 
@@ -43,12 +48,27 @@ class PfpForm(forms.ModelForm):
         fields = ["pfp"]
 
 class TradeForm(forms.ModelForm):
+    offered_posts = forms.ModelMultipleChoiceField(
+        queryset=Post.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        help_text="Select one or more of your posts to offer."
+    )
+
     class Meta:
         model = Trade
-        fields = ['item_offered', 'comment']
-        widgets = {
-            'item_offered': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'What will you offer?'})
-        }
+        fields = ['offered_posts', 'comment']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        if user is not None:
+            # Only allow offering your own available posts
+            self.fields['offered_posts'].queryset = Post.objects.filter(
+                poster=user,
+                is_available=True,
+            )
 
 class ReportForm(forms.ModelForm):
     class Meta:

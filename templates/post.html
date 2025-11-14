@@ -3,66 +3,144 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Post</title>
-    <!-- Bootstrap CSS -->
+    <title>{{ post.title }}</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        .post-hero-img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            border-radius: .5rem;
+        }
+        .offer-card-img {
+            height: 150px;
+            object-fit: cover;
+            border-radius: .25rem;
+        }
+    </style>
 </head>
 
-<body>
-    {% include '_navbar.html'%}
+<body class="bg-light">
+    {% include '_navbar.html' %}
 
-    {% if not post.available %}
-        <div class="alert alert-secondary mt-3">This item has already been traded.</div>
+    <!-- TRADED BANNER -->
+    {% if not post.is_available %}
+        <div class="alert alert-secondary mt-3 text-center">
+            <i class="bi bi-lock-fill"></i> This item has already been traded.
+        </div>
     {% endif %}
 
-    <div class="container">
-        <div class="row">
-            <div class="post-img md-3">
-                {% if post.img %} 
-                <img src="{{ post.image.url }}"
-                       alt="{{ post.title }}"
-                       style="object-fit: cover;
-                              height: 200px" />
-                {% endif %}
-            </div>
-        </div>
+    <div class="container py-4">
 
-        <div class="post-content row mt-3">
-            <div class="col-sm mt-2">
-                <h2 class="post-title">{{ post.title }}</h2>
-                <p class="post-description">{{ post.description }}</p>
-                <h5>Posted by <strong>{{ post.poster.username }}</strong></h5> <br />
-                {{ post.created_at|date:"M d, Y" }}
+        <!-- Main Layout -->
+        <div class="row g-4">
+
+            <!-- LEFT COLUMN: Post Display -->
+            <div class="col-lg-6">
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="post-hero-img mb-3" alt="{{ post.title }}">
+                {% endif %}
+
+                <h2 class="fw-bold">{{ post.title }}</h2>
+                <p class="text-muted mb-1">Posted by 
+                    <strong>{{ post.poster.username }}</strong>
+                </p>
+                <p class="text-muted">{{ post.created_at|date:"M d, Y" }}</p>
+
+                <hr>
+
+                <h5>Description</h5>
+                <p>{{ post.description }}</p>
+
+                <h5 class="mt-3">Details</h5>
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>Category:</strong> {{ post.category }}</li>
+                    <li class="list-group-item"><strong>Size:</strong> {{ post.general_size }}</li>
+                    <li class="list-group-item"><strong>Weight:</strong> {{ post.weight }}</li>
+                    {% if post.clothing_size %}
+                        <li class="list-group-item">
+                            <strong>Clothing size:</strong> {{ post.clothing_size }}
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
-            <div class="col-sm mt-2">
-                {% if post.poster.username == user.username %}
-                    <h4>This is your listing. Check your Active Trades to view incoming offers!</h4>
+
+            <!-- RIGHT COLUMN: Trade Area -->
+            <div class="col-lg-6">
+
+                {% if post.poster == user %}
+                    <!-- USER OWNS THIS POST -->
+                    <div class="p-3 bg-white shadow-sm rounded">
+                        <h4 class="mb-2">This is your listing.</h4>
+                        <p class="text-muted">Check your incoming offers in <a href="{% url 'my_trades' %}">My Trades</a>.</p>
+                    </div>
+
                 {% else %}
+
                     {% if existing_trade %}
-                        <h4> Your offer for this post:</h4>
-                        <p><strong>Item offered:</strong>{{ existing_trade.item_offered }}</p>
-                        {% if existing_trade.comments %}
-                            <p><strong>Comments:</strong></p>
-                        {% endif %}
-                        <p><strong>Status:</strong>{{ existing_trade.status }}</p>
-                        <a href="{% url 'start_chat' post.poster.id %}" class="btn btn-info">Check in with {{ post.poster.username }} about this trade</a>
+                        <!-- EXISTING OFFER SECTION -->
+                        <div class="p-3 bg-white shadow-sm rounded">
+                            <h4 class="mb-3">Your Current Offer</h4>
+
+                            <p><strong>Status:</strong> {{ existing_trade.status }}</p>
+                            {% if existing_trade.comment %}
+                                <p><strong>Your Message:</strong> {{ existing_trade.comment }}</p>
+                            {% endif %}
+
+                            {% if existing_trade.offered_posts.all %}
+                                <h6 class="mt-3">Posts You Offered:</h6>
+                                <div class="row row-cols-1 row-cols-md-2 g-2">
+                                    {% for offered in existing_trade.offered_posts.all %}
+                                        <div class="col">
+                                            <div class="card h-100">
+                                                {% if offered.image %}
+                                                    <img src="{{ offered.image.url }}" class="offer-card-img">
+                                                {% endif %}
+                                                <div class="card-body p-2">
+                                                    <h6 class="card-title small">{{ offered.title }}</h6>
+                                                    <a href="{% url 'view_post' offered.id %}" class="btn btn-sm btn-outline-secondary">View</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <a href="{% url 'start_chat' post.poster.id %}" class="btn btn-info mt-3">
+                                <i class="bi bi-chat-dots"></i> Message {{ post.poster.username }}
+                            </a>
+                        </div>
+
                     {% else %}
-                    <h4>Propose an offer for this listing:</h4>
-                    <form method="POST">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <button type="submit" class="btn btn-primary">Submit Offer</button>
-                    </form>
+
+                        <!-- CREATE OFFER SECTION -->
+                        <div class="p-3 bg-white shadow-sm rounded">
+                            <h4 class="mb-3">Make an Offer</h4>
+
+                            <form method="POST">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-arrow-repeat"></i> Send Trade Offer
+                                </button>
+                            </form>
+
+                            <p class="mt-3 text-muted small">
+                                Your offer can include one or more of your posts.
+                            </p>
+                        </div>
+
                     {% endif %}
                 {% endif %}
-            </div>         
+            </div>
         </div>
 
-        
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

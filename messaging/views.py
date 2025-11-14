@@ -9,15 +9,26 @@ from .models import ChatThread, Message
 
 # returns existing DM thread btwn two users if it exists, or create a new one if not
 def get_or_create_dm_thread(user1: User, user2: User) -> ChatThread:
-    existing = ChatThread.objects.filter(participants=user1).filter(participants=user2)
-    for thread in existing:
-        if thread.participants.count() == 2:
-            return thread
+    threads = ChatThread.objects.filter(
+        thread_type="dm",
+        participants=user1
+    ).filter(participants=user2)
 
-    thread = ChatThread.objects.create()
+    if threads.exists():
+        return threads.first()
+
+    thread = ChatThread.objects.create(thread_type="dm")
     thread.participants.add(user1, user2)
     return thread
 
+# group chats
+def create_group_thread(name: str, users: list[User]) -> ChatThread:
+    thread = ChatThread.objects.create(
+        thread_type="group",
+        name=name,
+    )
+    thread.participants.add(*users)
+    return thread
 
 # displays user's message inbox page: shows ongoing chat threads and a list of other active users they can start chats with
 @login_required
@@ -40,28 +51,31 @@ def inbox(request: HttpRequest) -> HttpResponse:
 @login_required
 def chat(request: HttpRequest, thread_id: int) -> HttpResponse:
     thread = get_object_or_404(ChatThread, id=thread_id)
+
     if request.user not in thread.participants.all():
         return HttpResponse(status=403)
-
-    other_user = next((u for u in thread.participants.all() if u != request.user), None)
 
     if request.method == "POST":
         content = (request.POST.get("content") or "").strip()
         if content:
-            Message.objects.create(thread=thread, sender=request.user, content=content)
+            Message.objects.create(
+                thread=thread,
+                sender=request.user,
+                content=content,
+                message_type="normal",
+            )
             return redirect("chat", thread_id=thread.id)
 
-    messages = Message.objects.filter(thread=thread)
-
-    trades = Trade.objects.filter(
-        Q(userOne=request.user, userTwo=other_user) |
-        Q(userOne=other_user, userTwo= request.user)
-    ).order_by("-created_at")
+    messages = thread.messages.all().select_related("sender", "related_trade")
 
     return render(
         request,
         "chat.html",
-        {"messages": messages, "other_user": other_user or request.user, "trades": trades},
+        {
+            "thread": thread,
+            "messages": messages,
+            "participants": thread.participants.all(),
+        },
     )
 
 # starts new chat thread btwn the current user and another user

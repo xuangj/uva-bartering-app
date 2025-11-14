@@ -4,9 +4,9 @@
             <h5 class="card-title">
                 <!--Link card to individual Trade page-->
                 {% if trade.userOne == request.user %} 
-                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered to <strong>{{ trade.userTwo.username }}</strong></a>
+                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered to <strong>{{ trade.receiver.username }}</strong></a>
                 {% else %}
-                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered from <strong>{{ trade.userOne.username }}</strong></a>
+                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered from <strong>{{ trade.offerer.username }}</strong></a>
                 {% endif %}
             </h5>
 
@@ -49,7 +49,7 @@
             </div>
             {% endif %}
 
-            <a href="{% url 'start_chat' trade.userOne.id %}" class="btn btn-sm btn-primary">
+            <a href="{% url 'start_chat' trade.offerer.id %}" class="btn btn-sm btn-primary">
                     <i class="bi bi-chat-dots"></i> Message
             </a>
             

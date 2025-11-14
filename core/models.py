@@ -1,10 +1,12 @@
 # core/models.py
+
 import os
 import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 STATUS_CHOICES = [
     ('Pending', 'Pending'),
@@ -118,25 +120,54 @@ class Post(models.Model):
         return self.title
 
 class Trade(models.Model):
-    userOne = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_initiated")
-    userTwo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_received")
-
-    post_reference = models.ForeignKey(
-        Post,
+    # The user who initiates the trade
+    offerer = models.ForeignKey(
+        User,
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
+        related_name="trades_made"
     )
 
-    item_offered = models.CharField(max_length=100)
-    item_requested = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="item_requested")
-    image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
+    # The owner of the requested post
+    receiver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="trades_received"
+    )
+
+    # The post being requested
+    item_requested = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="trades_offered_on"
+    )
+
+    # The posts the offerer is putting up in exchange
+    offered_posts = models.ManyToManyField(
+        Post,
+        related_name="trades_offered_with"
+    )
+
+    comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
-    comment = models.TextField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='Pending'
+    )
+
+    class Meta:
+        # Only one *pending* trade per (offerer, item_requested)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['offerer', 'item_requested'],
+                condition=Q(status='Pending'),
+                name='unique_pending_trade_per_user_and_post',
+            )
+        ]
 
     def __str__(self):
-        return f"{self.userOne.username} to {self.userTwo.username}"
+        return f"{self.offerer.username} → {self.receiver.username} for {self.item_requested.title}"
 
 class Report(models.Model):
     # The user who filed the report (ForeignKey to User or Profile)

@@ -1,12 +1,21 @@
+# core/views.py
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models import Q
 
 from .forms import PostForm, ProfileForm, ReportForm, TradeForm, PfpForm
 from .models import Post, Profile, Report, Trade, User
-from django.db.models import Q
+
 from messaging.views import get_or_create_dm_thread
+from messaging.utils import (
+    notify_trade_offer,
+    notify_trade_cancelled,
+    notify_trade_accepted,
+    notify_trade_denied,
+)
 
 
 # --- Pages --- #
@@ -15,8 +24,7 @@ from messaging.views import get_or_create_dm_thread
 # Render listings page
 def home(request):
     """Render homepage with all posts (and optional search filters)."""
-    posts = Post.objects.all().order_by("-created_at")
-
+    posts = Post.objects.filter(is_available=True).order_by("-created_at")
 
     # Category Filter
     catergory_filter = request.GET.get("category")
@@ -26,9 +34,7 @@ def home(request):
     general_size_filter = request.GET.get("general_size")
     weight_filter = request.GET.get("weight")
     sort_by = request.GET.get("sort_by")
-   
-   
-   
+
     if catergory_filter:
         posts = posts.filter(category=catergory_filter)
     if general_size_filter:
@@ -41,7 +47,7 @@ def home(request):
         posts = posts.filter(price__gte=price_min)
     if price_max and price_max.isdigit(): # Ensure input is valid before filtering
         posts = posts.filter(price__lte=price_max)    
-    
+
     if sort_by == 'oldest':
         posts = posts.order_by('created_at')
     elif sort_by == 'price_asc':
@@ -55,8 +61,7 @@ def home(request):
     else:
         # Default sort (Newest)
         posts = posts.order_by('-created_at')
-    
-    
+
     context = {
         'posts': posts,
         'categories': Post.CATEGORY,
@@ -143,26 +148,58 @@ def view_post(request, post_id: int) -> HttpResponse:
     post = get_object_or_404(Post, id=post_id)
     user = request.user
 
-    # Check if current user already made an offer for this listing/post
-    existing_trade = Trade.objects.filter(
-        item_requested=post, userOne=user
-    ).first() # Returns none if no trades exist
+    # Can't trade with yourself
+    can_trade = user != post.poster
 
-    # display trade form if haven't made offer
+    # Is there already a pending trade from this user on this post?
+    existing_trade = None
+    if can_trade:
+        existing_trade = Trade.objects.filter(
+            offerer=user,
+            item_requested=post,
+            status='Pending',
+        ).first()
+
     if request.method == "POST":
-        form = TradeForm(request.POST)
+        if not can_trade:
+            return HttpResponseForbidden("You cannot trade with your own listing.")
+
+        if existing_trade:
+            messages.error(request, "You already have a pending trade for this post.")
+            return redirect("view_post", post_id=post.id)
+
+        form = TradeForm(request.POST, user=user)
         if form.is_valid():
             trade = form.save(commit=False)
-            trade.userOne = request.user
-            trade.userTwo = post.poster
+            trade.offerer = user
+            trade.receiver = post.poster
             trade.item_requested = post
-            trade.post_reference = post
+            trade.status = 'Pending'
             trade.save()
+            form.save_m2m()  # for offered_posts
+
+            # Chat notification
+            notify_trade_offer(trade)
+
+            messages.success(request, "Trade offer sent!", extra_tags="trade")
+
             return redirect("my_trades")
     else:
-        form = TradeForm()
+        # Only show the form if:
+        # - user is not the poster
+        # - no pending trade already exists
+        form = TradeForm(user=user) if can_trade and not existing_trade else None
 
-    return render(request, "post.html", {'post': post, 'form': form, 'existing_trade': existing_trade})
+    return render(
+        request,
+        "post.html",
+        {
+            'post': post,
+            'form': form,
+            'existing_trade': existing_trade,
+            'can_trade': can_trade,
+        },
+    )
 
 
 # Edits existing post
@@ -247,29 +284,43 @@ def my_trades(request) -> HttpResponse:
     user = request.user
 
     pending_trades = Trade.objects.filter(
-        Q(userOne=request.user) | Q(userTwo=request.user),
+        Q(offerer=user) | Q(receiver=user),
         status='Pending'
-    )
+    ).select_related('item_requested', 'offerer', 'receiver').prefetch_related('offered_posts')
 
     accepted_trades = Trade.objects.filter(
-        Q(userOne=request.user) | Q(userTwo=request.user),
+        Q(offerer=user) | Q(receiver=user),
         status='Accepted'
-    )
+    ).select_related('item_requested', 'offerer', 'receiver').prefetch_related('offered_posts')
 
     denied_trades = Trade.objects.filter(
-        Q(userOne=request.user) | Q(userTwo=request.user),
+        Q(offerer=user) | Q(receiver=user),
         status='Denied'
-    )
+    ).select_related('item_requested', 'offerer', 'receiver').prefetch_related('offered_posts')
 
-    return render(request, "my_trades.html", {"pending_trades": pending_trades, "accepted_trades": accepted_trades, "denied_trades": denied_trades})
+    return render(
+        request,
+        "my_trades.html",
+        {
+            "pending_trades": pending_trades,
+            "accepted_trades": accepted_trades,
+            "denied_trades": denied_trades,
+        },
+    )
 
 
 # view individual trade, see original post and possible offer
 @login_required
 def view_trade(request, trade_id: int) -> HttpResponse:
-    trade = get_object_or_404(Trade, id=trade_id)
-    post = trade.post_reference
-    user = request.user
+    trade = get_object_or_404(
+        Trade.objects.select_related('item_requested', 'offerer', 'receiver').prefetch_related('offered_posts'),
+        id=trade_id,
+    )
+
+    if request.user not in (trade.offerer, trade.receiver) and not request.user.is_staff:
+        return HttpResponseForbidden("You are not part of this trade.")
+
+    post = trade.item_requested
 
     return render(request, "trade.html", {'trade': trade, 'post': post})
 
@@ -277,35 +328,66 @@ def view_trade(request, trade_id: int) -> HttpResponse:
 # OP can accept trade offer
 @login_required
 def accept_trade(request, trade_id):
-    trade = get_object_or_404(Trade, id=trade_id)
+    trade = get_object_or_404(Trade, id=trade_id, receiver=request.user)
 
-    if trade.item_requested.poster != request.user:
-        return HttpResponseForbidden("You're not the OP, you cannot accept this offer")
-    
+    if trade.status != 'Pending':
+        messages.error(request, "This trade is no longer pending.")
+        return redirect("my_trades")
+
     trade.status = 'Accepted'
-    trade.item_requested.is_available = False
-    trade.save() 
+    trade.save()
 
-    messages.success(request, "Trade Accepted!", extra_tags="trade")
+    # Take down the requested post
+    requested_post = trade.item_requested
+    requested_post.is_available = False
+    requested_post.save()
 
+    # Take down all offered posts
+    for offered_post in trade.offered_posts.all():
+        offered_post.is_available = False
+        offered_post.save()
+
+    # Chat notification
+    notify_trade_accepted(trade, request.user)
+
+    messages.success(request, "Trade accepted!", extra_tags="trade")
     return redirect('my_trades')
 
 
 # OP can decline trade offer
 @login_required
 def deny_trade(request, trade_id):
-    trade = get_object_or_404(Trade, id=trade_id, userTwo=request.user)
+    trade = get_object_or_404(Trade, id=trade_id, receiver=request.user)
+
+    if trade.status != 'Pending':
+        messages.error(request, "This trade is no longer pending.")
+        return redirect("my_trades")
+
     trade.status = 'Denied'
     trade.save()
+
+    # Chat notification
+    notify_trade_denied(trade, request.user)
+
+    messages.info(request, "Trade denied.", extra_tags="trade")
     return redirect('my_trades')
 
 
 # Offerer can rescind their offer
 @login_required
 def delete_trade_offer(request, trade_id):
-    trade = get_object_or_404(Trade,id=trade_id, userOne=request.user)
+    trade = get_object_or_404(Trade, id=trade_id, offerer=request.user)
+
+    if trade.status != 'Pending':
+        messages.error(request, "You can only withdraw pending trades.")
+        return redirect("my_trades")
+
+    # Chat notification
+    notify_trade_cancelled(trade, request.user)
 
     trade.delete()
+    messages.info(request, "Trade offer withdrawn.", extra_tags="trade")
+
     return redirect("my_trades")
 
 @login_required
