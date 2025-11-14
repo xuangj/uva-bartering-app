@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
-from core.views import home, login_redirect_view, moderator_dashboard, post_create, user_profile, edit_profile, my_trades, view_post, view_trade, accept_trade, deny_trade, delete_trade_offer
+from core.views import home, login_redirect_view, moderator_dashboard, post_create, user_profile, edit_profile, my_trades, view_post, view_trade, accept_trade, deny_trade, delete_trade_offer, report_post
 from messaging.views import chat, get_or_create_dm_thread, inbox, start_chat
 
 urlpatterns = [
@@ -18,6 +18,7 @@ urlpatterns = [
     path("inbox/", inbox, name="inbox"),
     path("chat/<int:thread_id>/", chat, name="chat"),
     path("inbox/", inbox, name="inbox"),
+    path("report/<int:post_id>/", report_post, name='report_post'),
     path("start/<int:user_id>/", start_chat, name="start_chat"),
 
     path("user/<str:username>/", user_profile, name="user_profile"),

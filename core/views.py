@@ -3,11 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
-
-from .forms import PostForm, ProfileForm, TradeForm
-from .models import Post, Profile, Trade
+from .forms import PostForm, ProfileForm, ReportForm, TradeForm
+from .models import Post, Profile, Report, Trade
 from django.db.models import Q
 from messaging.views import get_or_create_dm_thread
+
 
 # --- Pages --- #
 
@@ -23,18 +23,45 @@ def home(request):
     name_search = request.GET.get("name")
     price_min = request.GET.get("price_min")
     price_max = request.GET.get("price_max")
-
+    general_size_filter = request.GET.get("general_size")
+    weight_filter = request.GET.get("weight")
+    sort_by = request.GET.get("sort_by")
+   
+   
+   
     if catergory_filter:
         posts = posts.filter(category=catergory_filter)
+    if general_size_filter:
+        posts = posts.filter(general_size=general_size_filter)
+    if weight_filter:
+        posts = posts.filter(weight=weight_filter)
     if name_search:
         posts = posts.filter(title__icontains=name_search)
     if price_min and price_min.isdigit(): # Ensure input is valid before filtering
         posts = posts.filter(price__gte=price_min)
     if price_max and price_max.isdigit(): # Ensure input is valid before filtering
         posts = posts.filter(price__lte=price_max)    
+    
+    if sort_by == 'oldest':
+        posts = posts.order_by('created_at')
+    elif sort_by == 'price_asc':
+        posts = posts.order_by('price')
+    elif sort_by == 'price_desc':
+        posts = posts.order_by('-price') # Prefix with '-' for descending
+    elif sort_by == 'title_asc':
+        posts = posts.order_by('title')
+    elif sort_by == 'title_desc':
+        posts = posts.order_by('-title') # Prefix with '-' for descending
+    else:
+        # Default sort (Newest)
+        posts = posts.order_by('-created_at')
+    
+    
     context = {
         'posts': posts,
         'categories': Post.CATEGORY,
+        'general_sizes': Post.GENERAL_SIZES,
+        'weights': Post.WEIGHT_CATEGORIES,
     }
     name_query = request.GET.get("name")
     if name_query:
@@ -202,16 +229,13 @@ def edit_profile(request, username):
         {"form": form, "user": user},
     )
 
-
 @login_required
 def delete_profile(request, profile_id):
     profile = get_object_or_404(Profile, id=profile_id)
 
-
-
-
     
 # --- Trades --- #
+
 
 # See all active trades (offers and listings)
 @login_required
@@ -279,3 +303,35 @@ def delete_trade_offer(request, trade_id):
 
     trade.delete()
     return redirect("my_trades")
+
+@login_required
+def report_post(request, post_id):
+    # Get the post being reported
+    reported_post = get_object_or_404(Post, id=post_id)
+    reported_user = reported_post.poster # Assuming reported_post.poster is a Profile, and Profile has a 'user' field
+    
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            # Save the form data (comments only)
+            new_report = form.save(commit=False)
+            
+            # Manually assign the required relationship fields
+            new_report.reporter = request.user
+            new_report.reported_user = reported_user
+            new_report.reported_post = reported_post
+            
+            new_report.save()
+            
+            # Since this is a popup window, we can send a simple success message
+            return redirect('home')  # Redirect to home or any other appropriate page
+    else:
+        form = ReportForm()
+
+    context = {
+        'reported_post': reported_post,
+        'reported_user': reported_user,
+        'form': form
+    }
+    # Use a basic template designed for a small popup window
+    return render(request, 'report_form.html', context)

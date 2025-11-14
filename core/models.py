@@ -4,7 +4,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
-
+from django.core.exceptions import ValidationError
 # --- Helper functions --- #
 
 
@@ -61,19 +61,53 @@ class Post(models.Model):
         ('Miscellaneous', 'Miscellaneous'),
     ]
 
-    poster = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
+    # 1. Choices for ALL items (Big to Small)
+    GENERAL_SIZES = [
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'Extra Large'),
+    ]
+
+    # 2. Choices for ALL items (Heavy to Light)
+    WEIGHT_CATEGORIES = [
+        ('L', 'Light'),
+        ('M', 'Medium'),
+        ('H', 'Heavy'),
+    ]
+
+    # 3. Choices ONLY for Clothing category
+    CLOTHING_SIZES = [
+        ('XS', 'Extra Small (XS)'),
+        ('S', 'Small (S)'),
+        ('M', 'Medium (M)'),
+        ('L', 'Large (L)'),
+        ('XL', 'Extra Large (XL)'),
+        ('XXL', 'Double Extra Large (XXL)'),
+    ]
+    
+    poster = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     item_offered = models.CharField(max_length=100, default=title)
     description = models.TextField()
     image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
     category = models.CharField(max_length=50, choices=CATEGORY, default='Miscellaneous')
+    general_size = models.CharField(max_length=5, choices=GENERAL_SIZES, default='M',verbose_name='Item Size (General)')
+    weight = models.CharField(max_length=5, choices=WEIGHT_CATEGORIES, default='M',verbose_name='Item Weight')
+    clothing_size = models.CharField(max_length=5, choices=CLOTHING_SIZES, blank=True, null=True,verbose_name='Clothing Size')
     price = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     is_available = models.BooleanField(default=True)
 
+    def clean(self):
+        super().clean()
+        if self.category == 'Clothing' and not self.clothing_size:
+            raise ValidationError({'clothing_size': 'Clothing size is required for items in the Clothing category.'})
+        if self.category != 'Clothing' and self.clothing_size:
+            self.clothing_size = None  # Clear clothing_size if not in Clothing category
+    
     def __str__(self):
-        return f"{self.title} from {self.poster.username}"
-
+        return self.title
 
 class Trade(models.Model):
     STATUS_CHOICES = [
@@ -84,6 +118,37 @@ class Trade(models.Model):
 
     userOne = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_initiated")
     userTwo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_received")
+
+class Report(models.Model):
+    # The user who filed the report (ForeignKey to User or Profile)
+    # Assuming 'reporter' is linked directly to the standard Django User
+    reporter = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='reports_filed'
+    )
+    
+    # The user whose account/post is being reported
+    reported_user = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='reports_received'
+    )
+    
+    # The specific post being reported (ForeignKey to Post)
+    reported_post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE, 
+        related_name='reports'
+    )
+    
+    # The reason for the report
+    comments = models.TextField(verbose_name='Reason for Report')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report by {self.reporter.username} on Post {self.reported_post.id}"
     
     post_reference = models.ForeignKey(
         Post,
