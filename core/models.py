@@ -5,8 +5,14 @@ import uuid
 from django.contrib.auth.models import User
 from django.db import models
 from django.core.exceptions import ValidationError
-# --- Helper functions --- #
 
+STATUS_CHOICES = [
+    ('Pending', 'Pending'),
+    ('Accepted', 'Accepted'),
+    ('Denied', 'Denied'),
+]
+
+# --- Helper functions --- #
 
 def unique_post_image_path(instance, filename):
     """Generate unique file path for each uploaded post image."""
@@ -112,14 +118,25 @@ class Post(models.Model):
         return self.title
 
 class Trade(models.Model):
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Accepted', 'Accepted'),
-        ('Denied', 'Denied'),
-    ]
-
     userOne = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_initiated")
     userTwo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades_received")
+
+    post_reference = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    item_offered = models.CharField(max_length=100)
+    item_requested = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="item_requested")
+    image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    comment = models.TextField()
+
+    def __str__(self):
+        return f"{self.userOne.username} to {self.userTwo.username}"
 
 class Report(models.Model):
     # The user who filed the report (ForeignKey to User or Profile)
@@ -152,19 +169,3 @@ class Report(models.Model):
     def __str__(self):
         return f"Report by {self.reporter.username} on Post {self.reported_post.id}"
     
-    post_reference = models.ForeignKey(
-        Post,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-
-    item_offered = models.CharField(max_length=100)
-    item_requested = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="item_requested")
-    image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
-    comment = models.TextField()
-
-    def __str__(self):
-        return f"{self.userOne.username} to {self.userTwo.username}"
