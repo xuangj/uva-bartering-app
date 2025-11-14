@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Report Post</title>
+  </head>
+  <body>
+    <h5>Report Post: {{ reported_post.title }}</h5>
+    <p>User: <strong>{{ reported_user.username }}</strong></p>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-danger btn-sm">Submit Report</button>
+    </form>
+    {% if form.errors %}
+      <div style="color: red;">
+        Please correct the errors below:
+        {{ form.errors }}
+      </div>
+    {% endif %}
+  </body>
+</html>
+

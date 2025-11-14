@@ -122,8 +122,8 @@
                       <i class="bi bi-three-dots-vertical"></i> </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                         <li><a class="dropdown-item text-danger" 
-                              href="#" 
-                              onclick="alert('Report feature is disabled for UI testing!'); return false;">
+                              href="{% url 'report_post' post_id=post.id %}"
+                              onclick="window.open(this.href, 'ReportWindow', 'width=600,height=400'); return false;">
                             <i class="bi bi-flag me-2"></i>Report Post
                         </a></li>
                     </ul>

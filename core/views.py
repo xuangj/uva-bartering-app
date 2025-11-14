@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from django.shortcuts import redirect, render
+from django.http import HttpResponseForbidden, HttpResponse
+from django.shortcuts import redirect, render, get_object_or_404
 
-from .forms import PostForm, ProfileForm
-from .models import Post, Profile
+from .forms import PostForm, ProfileForm, ReportForm
+from .models import Post, Profile, Report
 
 # --- Pages --- #
 
@@ -121,3 +121,38 @@ def edit_profile(request, username):
         "profile.html",
         {"form": form, "user": user},
     )
+
+@login_required
+def report_post(request, post_id):
+    # Get the post being reported
+    reported_post = get_object_or_404(Post, id=post_id)
+    reported_user = reported_post.poster.username # Assuming reported_post.poster is a Profile, and Profile has a 'user' field
+    
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            # Save the form data (comments only)
+            new_report = form.save(commit=False)
+            
+            # Manually assign the required relationship fields
+            new_report.reporter = request.user
+
+            profile = get_object_or_404(Profile, user=reported_user)
+
+            new_report.reported_user = request.user
+            new_report.reported_post = reported_post
+            
+            new_report.save()
+            
+            # Since this is a popup window, we can send a simple success message
+            return render(request, 'report_success.html', {'message': 'Report submitted successfully!'})
+    else:
+        form = ReportForm()
+
+    context = {
+        'reported_post': reported_post,
+        'reported_user': reported_user,
+        'form': form
+    }
+    # Use a basic template designed for a small popup window
+    return render(request, 'report_form.html', context)

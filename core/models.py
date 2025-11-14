@@ -72,4 +72,35 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+class Report(models.Model):
+    # The user who filed the report (ForeignKey to User or Profile)
+    # Assuming 'reporter' is linked directly to the standard Django User
+    reporter = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='reports_filed'
+    )
+    
+    # The user whose account/post is being reported
+    reported_user = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='reports_received'
+    )
+    
+    # The specific post being reported (ForeignKey to Post)
+    reported_post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE, 
+        related_name='reports'
+    )
+    
+    # The reason for the report
+    comments = models.TextField(verbose_name='Reason for Report')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report by {self.reporter.username} on Post {self.reported_post.id}"
     
