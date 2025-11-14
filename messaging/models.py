@@ -30,6 +30,24 @@ class ChatThread(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def latest_message(self):
+        return self.messages.order_by("-created_at").first()
+
+    @property
+    def display_name(self):
+        # For group chats, show: “Group Chat (3 members)”
+        if self.participants.count() > 2:
+            count = self.participants.count()
+            return f"Group Chat ({count} members)"
+
+        # For 1–1 chats, show the other user’s name
+        usernames = [
+            u.username for u in self.participants.all()
+            if u != self.requesting_user
+        ]
+        return usernames[0] if usernames else "Chat"
+
     def __str__(self):
         if self.thread_type == "dm":
             users = ", ".join(self.participants.values_list("username", flat=True))
