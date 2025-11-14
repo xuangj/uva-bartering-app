@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Post</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body>
+    {% include '_navbar.html'%}
+
+    {% if not post.available %}
+        <div class="alert alert-secondary mt-3">This item has already been traded.</div>
+    {% endif %}
+
+    <div class="container">
+        <div class="row">
+            <div class="post-img md-3">
+                {% if post.img %} 
+                <img src="{{ post.image.url }}"
+                       alt="{{ post.title }}"
+                       style="object-fit: cover;
+                              height: 200px" />
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="post-content row mt-3">
+            <div class="col-sm mt-2">
+                <h2 class="post-title">{{ post.title }}</h2>
+                <p class="post-description">{{ post.description }}</p>
+                <h5>Posted by <strong>{{ post.poster.username }}</strong></h5> <br />
+                {{ post.created_at|date:"M d, Y" }}
+            </div>
+            <div class="col-sm mt-2">
+                {% if post.poster.username == user.username %}
+                    <h4>This is your listing. Check your Active Trades to view incoming offers!</h4>
+                {% else %}
+                    {% if existing_trade %}
+                        <h4> Your offer for this post:</h4>
+                        <p><strong>Item offered:</strong>{{ existing_trade.item_offered }}</p>
+                        {% if existing_trade.comments %}
+                            <p><strong>Comments:</strong></p>
+                        {% endif %}
+                        <p><strong>Status:</strong>{{ existing_trade.status }}</p>
+                        <a href="{% url 'start_chat' post.poster.id %}" class="btn btn-info">Check in with {{ post.poster.username }} about this trade</a>
+                    {% else %}
+                    <h4>Propose an offer for this listing:</h4>
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">Submit Offer</button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+            </div>         
+        </div>
+
+        
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

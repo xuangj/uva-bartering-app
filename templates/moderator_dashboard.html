@@ -13,27 +13,8 @@
 
 <body>
     <!-- NAV BAR -->
-    <nav class="navbar navbar-expand-lg shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">UVA Trading App</a>
-            <div class="d-flex align-items-center">
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Hello, <strong>{{ user.username|capfirst }}</strong>
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a>
-                        </li>
-                        {% if user.is_authenticated and user.is_staff %}
-                        <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Moderator Dashboard</a></li>
-                        {% endif %}
-                        <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
+    {% include '_navbar.html'%}
+    
     <p> moderator dashboard (empty right now)</p>
     <!-- Bootstrap JS bundle (for dropdown functionality) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

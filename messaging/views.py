@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Q
+from core.models import Trade
 
 from .models import ChatThread, Message
 
@@ -51,10 +52,16 @@ def chat(request: HttpRequest, thread_id: int) -> HttpResponse:
             return redirect("chat", thread_id=thread.id)
 
     messages = Message.objects.filter(thread=thread)
+
+    trades = Trade.objects.filter(
+        Q(userOne=request.user, userTwo=other_user) |
+        Q(userOne=other_user, userTwo= request.user)
+    ).order_by("-created_at")
+
     return render(
         request,
         "chat.html",
-        {"messages": messages, "other_user": other_user or request.user},
+        {"messages": messages, "other_user": other_user or request.user, "trades": trades},
     )
 
 # starts new chat thread btwn the current user and another user

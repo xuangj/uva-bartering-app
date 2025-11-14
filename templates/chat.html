@@ -8,26 +8,24 @@
           rel="stylesheet" />
   </head>
   <body class="bg-light">
-    <nav class="navbar navbar-expand-lg shadow-sm">
-      <div class="container d-flex justify-content-between align-items-center">
-        <a class="navbar-brand fw-semibold" href="#">UVA Trading App</a>
-        <div class="d-flex align-items-center">
-          {% if user.is_authenticated %}
-            <span class="me-3">Hello, <strong>{{ user.username|capfirst }}</strong></span>
-            <a href="{% url 'home' %}" class="btn btn-secondary btn-sm me-2">Home</a>
-            <a href="{% url 'inbox' %}" class="btn btn-primary btn-sm me-2">Return to Inbox</a>
-            <a href="{% url 'account_logout' %}"
-               class="btn btn-outline-danger btn-sm">Logout</a>
-          {% else %}
-            <span class="me-3">You are not logged in</span>
-            <a href="{% url 'account_login' %}"
-               class="btn btn-outline-primary btn-sm">Login</a>
-          {% endif %}
-        </div>
-      </div>
-    </nav>
+    {% include '_navbar.html'%}
+
     <div class="container py-4">
       <h1 class="mb-4">Chat with {{ other_user.username }}</h1>
+      {% if pending_trades %}
+        {% for trade in pending_trades %}
+          <div class="alert alert-info mt-4">
+            {% if trade.userOne == request.user %}
+              You offered {{ trade.item_offered }} to <strong>{{ trade.userTwo.username }}</strong>
+            {% else %}
+              {{ trade.userTwo.username }} offered you <strong>{{ trade.item_offered }}</strong>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+      <div class="alert alert-info mt-4">No active trades exist between you and {{ other_user.username }} yet</div>
+      {% endif %}
+    
       <div class="messages-box">
         {% for msg in messages %}
           <div class="message mb-2 {% if msg.sender == user %}sent{% else %}received{% endif %}">
@@ -46,7 +44,6 @@
           <input name="content"
                  class="form-control"
                  placeholder="Type your message...">
-        </input>
         <button class="send-btn btn btn-primary px-4" type="submit">Send</button>
       </div>
     </form>
@@ -113,5 +110,7 @@
         border-bottom-left-radius: 0;
       }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

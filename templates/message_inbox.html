@@ -8,25 +8,8 @@
           rel="stylesheet" />
   </head>
   <body class="bg-light">
-    <nav class="navbar navbar-expand-lg shadow-sm">
-      <div class="container d-flex justify-content-between align-items-center">
-        <a class="navbar-brand fw-semibold" href="#">UVA Trading App</a>
-        <div class="d-flex align-items-center">
-          {% if user.is_authenticated %}
-            <span class="me-3">Hello, <strong>{{ user.username|capfirst }}</strong></span>
-            <a href="{% url 'home' %}"
-               class="btn btn-secondary btn-sm"
-               style="margin-right: 0.5rem">Home</a>
-            <a href="{% url 'account_logout' %}"
-               class="btn btn-outline-danger btn-sm">Logout</a>
-          {% else %}
-            <span class="me-3">You are not logged in</span>
-            <a href="{% url 'account_login' %}"
-               class="btn btn-outline-primary btn-sm">Login</a>
-          {% endif %}
-        </div>
-      </div>
-    </nav>
+    {% include '_navbar.html'%}
+    
     <div class="container content-container">
       <h1 class="my-4">Inbox!</h1>
       <!-- ongoing chat threads -->
