@@ -6,7 +6,7 @@ from .models import Post, Profile, Report
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "description", "image", "category","price"]
+        fields = ["title", "description", "image", "category","price","general_size","weight","clothing_size"]
 
 class ProfileForm(forms.ModelForm):
     class Meta:

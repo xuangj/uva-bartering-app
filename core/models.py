@@ -4,7 +4,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
-
+from django.core.exceptions import ValidationError
 # --- Helper functions --- #
 
 
@@ -61,15 +61,50 @@ class Post(models.Model):
         ('Miscellaneous', 'Miscellaneous'),
     ]
 
+    # 1. Choices for ALL items (Big to Small)
+    GENERAL_SIZES = [
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'Extra Large'),
+    ]
+
+    # 2. Choices for ALL items (Heavy to Light)
+    WEIGHT_CATEGORIES = [
+        ('L', 'Light'),
+        ('M', 'Medium'),
+        ('H', 'Heavy'),
+    ]
+
+    # 3. Choices ONLY for Clothing category
+    CLOTHING_SIZES = [
+        ('XS', 'Extra Small (XS)'),
+        ('S', 'Small (S)'),
+        ('M', 'Medium (M)'),
+        ('L', 'Large (L)'),
+        ('XL', 'Extra Large (XL)'),
+        ('XXL', 'Double Extra Large (XXL)'),
+    ]
+
     
     poster = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     description = models.TextField()
     image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
     category = models.CharField(max_length=50, choices=CATEGORY, default='Miscellaneous')
+    general_size = models.CharField(max_length=5, choices=GENERAL_SIZES, default='M',verbose_name='Item Size (General)')
+    weight = models.CharField(max_length=5, choices=WEIGHT_CATEGORIES, default='M',verbose_name='Item Weight')
+    clothing_size = models.CharField(max_length=5, choices=CLOTHING_SIZES, blank=True, null=True,verbose_name='Clothing Size')
     price = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
+    def clean(self):
+        super().clean()
+        if self.category == 'Clothing' and not self.clothing_size:
+            raise ValidationError({'clothing_size': 'Clothing size is required for items in the Clothing category.'})
+        if self.category != 'Clothing' and self.clothing_size:
+            self.clothing_size = None  # Clear clothing_size if not in Clothing category
+    
     def __str__(self):
         return self.title
 

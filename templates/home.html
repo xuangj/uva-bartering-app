@@ -62,7 +62,7 @@
       <h3 class="mb-4">Search Listings</h3>
       <!-- Search Form -->
       <form class="row g-3" method="get">
-        <div class="col-md-4">
+        <div class="col-md-2">
           <label for="name" class="form-label">Name</label>
           <input type="text"
                  name="name"
@@ -94,6 +94,43 @@
                    placeholder="Max $" />
           </div>
         </div>
+        <div class="col-md-1">
+          <label for="general_size" class="form-label">Size</label>
+          <select name="general_size" id="general_size" class="form-select">
+            <option value="" {% if not request.GET.general_size %}selected{% endif %}>All</option>
+            {% for size_value, size_label in general_sizes %}
+              <option value="{{ size_value }}"{% if request.GET.general_size == size_value %}selected{% endif %}>
+                  {{ size_label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-1">
+          <label for="weight" class="form-label">Weight</label>
+          <select name="weight" id="weight" class="form-select">
+            <option value="" {% if not request.GET.weight %}selected{% endif %}>All</option>
+            {% for weight_value, weight_label in weights %}
+              <option value="{{ weight_value }}"{% if request.GET.weight == weight_value %}selected{% endif %}>
+                  {{ weight_label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+          <div class="col-md-2">
+          <label for="sort_by" class="form-label">Sort By</label>
+          <select name="sort_by" id="sort_by" class="form-select">
+            
+            <option value="" {% if not request.GET.sort_by %}selected{% endif %}>Newest (Default)</option>
+            <option value="oldest" {% if request.GET.sort_by == 'oldest' %}selected{% endif %}>Oldest</option>
+            
+            <option value="price_asc" {% if request.GET.sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_desc" {% if request.GET.sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+            
+            <option value="title_asc" {% if request.GET.sort_by == 'title_asc' %}selected{% endif %}>Title (A-Z)</option>
+            <option value="title_desc" {% if request.GET.sort_by == 'title_desc' %}selected{% endif %}>Title (Z-A)</option>
+            
+          </select>
+        </div>
         <div class="col-md-2">
           <label class="form-label"></label>
           <div class="d-flex gap-2">
@@ -122,16 +159,32 @@
                       <i class="bi bi-three-dots-vertical"></i> </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                         <li><a class="dropdown-item text-danger" 
-                              href="{% url 'report_post' post_id=post.id %}"
-                              onclick="window.open(this.href, 'ReportWindow', 'width=600,height=400'); return false;">
-                            <i class="bi bi-flag me-2"></i>Report Post
+                              href="{% url 'report_post' post_id=post.id %}">
+                              <i class="bi bi-flag me-2"></i>Report Post
                         </a></li>
                     </ul>
                   </div>
                   </div>
-                  <p>Category: <strong>{{ post.category }}</strong></p>
-                  <p>Price: <strong>${{ post.price }}</strong></p>
-                  <p class="card-text">{{ post.description|truncatechars:120 }}</p>
+                  <div class="d-flex flex-wrap gap-2 mb-2">
+                      <span class="badge bg-primary">Category: {{ post.category }}</span>
+                      <span class="badge bg-success">Price: ${{ post.price }}</span>
+                  </div>
+                  <p class="mb-1">
+                      <small class="text-muted me-3">
+                          Size: <strong>{{ post.general_size }}</strong>
+                      </small>
+                      <small class="text-muted">
+                          Weight: <strong>{{ post.weight }}</strong>
+                      </small>
+                  </p>
+                  {% if post.clothing_size %}
+                      <p class="mb-1">
+                          <small class="text-muted">
+                              Clothing Size: <strong>{{ post.clothing_size}}</strong>
+                          </small>
+                      </p>
+                  {% endif %}
+                  <p class="card-text mt-3">{{ post.description|truncatechars:120 }}</p>
                 </div>
                 <div class="card-footer text-muted">
                   Posted by <strong>{{ post.poster.username }}</strong>
