@@ -14,6 +14,40 @@
 <body>
     <!-- NAV BAR -->
     {% include '_navbar.html'%}
+
+    <!--Search for specific username or role-->
+    <div class="container py-4">
+        <form class="row g-3" method="get">
+            <div class="col-md-4">
+                <label for="name" class="form-label">Name</label>
+                <input type="text"
+                    name="name"
+                    id="name"
+                    class="form-control"
+                    placeholder="Search by name" />
+            </div>
+            <div class="col-md-2">
+                <label for="role" class="form-label">Role</label>
+                <select name="role" id="role" class="form-select">
+                    <option value="">All</option>
+                    <option value="Undergraduate Student">Undergraduate Student</option>
+                    <option value="Graduate Student">Graduate Student</option>
+                    <option value="Faculty">Faculty</option>
+                    <option value="Other">Other</option>
+
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"></label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <!--Profile display, allows for deleting profiles/users-->
     <div class="container py-4">
         <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for profile in profiles %}

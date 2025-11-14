@@ -38,12 +38,23 @@ def login_redirect_view(request):
 # Only load moderator dashboard if the user is staff
 @login_required
 def moderator_dashboard(request):
-    user = request.user
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not allowed to access this page.")
+    
     profiles = Profile.objects.all()
 
-    if user.is_staff:
-        return render(request, "moderator_dashboard.html", {"profiles": profiles})
-    return HttpResponseForbidden("You are not allowed to access this page.")
+    # Allow for profile searching
+    name_query = request.GET.get("name")
+    role_query = request.GET.get("role")
+
+    if name_query: 
+        profiles = profiles.filter(user__username__icontains=name_query)
+    if role_query: 
+        profiles = profiles.filter(role=role_query)
+
+    return render(request, "moderator_dashboard.html", {"profiles": profiles})
+
+    
 
 
 # Profile pages
@@ -184,6 +195,7 @@ def edit_profile(request, username):
     )
 
 
+# Delete profile and user
 @login_required
 def delete_profile(request, profile_id):
     if not request.user.is_staff:

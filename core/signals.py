@@ -15,6 +15,8 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
+
+# Hard-coded interests inserted into tables
 @receiver(post_migrate)
 def populate_default_interests(sender, **kwargs):
     SUSTAINABILITY_INTERESTS = [
