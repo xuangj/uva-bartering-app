@@ -61,7 +61,7 @@
                         {% endif %}
 
                         <!-- debugging statement, username autofill is buggy rn -->
-                        <p>DEBUG: username_form exists? {{ username_form|yesno:"yes,no" }}</p>
+                        <!-- <p>DEBUG: username_form exists? {{ username_form|yesno:"yes,no" }}</p> -->
 
                         <!-- edit profile pop-up modal -->
                         <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModal" aria-hidden="true">
@@ -69,7 +69,7 @@
                                 <div class="modal-content rounded-4">
                                     <form method="post" action="{% url 'edit_profile' username=user.username %}" enctype="multipart/form-data">
                                         {% csrf_token %}
-                                        <p>Debug: username initial = {{ form.username.value }}</p>
+                                        <!-- <p>Debug: username initial = {{ form.username.value }}</p> -->
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="profileModalLabel">Edit your profile</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
@@ -78,7 +78,7 @@
 
                                         <div class="modal-body text-start" style="padding-left: 2rem">
                                             <div class="mb-3">
-                                                <label for="{{ username_form.username.id_for_label }}" class="form-label" style="font-weight: bold">Username</label><br />
+                                                <label for="{{ form.user.id_for_label }}" class="form-label" style="font-weight: bold">Username</label><br />
                                                 {{ form.username }}
                                             </div>
                                             <div class="mb-3">
