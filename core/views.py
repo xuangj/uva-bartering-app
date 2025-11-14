@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import PostForm, ProfileForm, ReportForm, TradeForm
-from .models import Post, Profile, Report, Trade
+from .forms import PostForm, ProfileForm, ReportForm, TradeForm, PfpForm
+from .models import Post, Profile, Report, Trade, User
 from django.db.models import Q
 from messaging.views import get_or_create_dm_thread
 
@@ -95,17 +95,20 @@ def moderator_dashboard(request):
 # Profile pages
 @login_required
 def user_profile(request, username):
-    user = request.user
-    if hasattr(user, 'profile'):
-        form = ProfileForm(instance=user.profile)
+
+    # identify the user you are on the page for
+    viewed_user = get_object_or_404(User, username=username)
+
+    # find their profile info if it exists
+    if hasattr(viewed_user, 'profile'):
+        form = ProfileForm(instance=viewed_user.profile)
     else:
-        form = None  # optional fallback
-    return render(request, 'profile.html', {'user': user, 'form': form})
+        form = None 
+
+    return render(request, 'profile.html', {'user': viewed_user, 'form': form})
 
 
 # --- Posts --- #
-
-
 # Allow a user to create a new Post
 @login_required
 def post_create(request):
@@ -210,18 +213,19 @@ def delete_post(request, post_id: int):
 
 @login_required
 def edit_profile(request, username):
-    user = request.user
-
+    user = request.user    
     if username != user.username:
         return HttpResponseForbidden("You can only edit your own profile")
 
     if request.method == "POST":
         form = ProfileForm(request.POST, instance=user.profile)
+       #  print("DEBUG username initial:", form.fields['username'].initial)
         if form.is_valid():
             form.save()
             return redirect("user_profile", username=user.username)
     else:
-        form = ProfileForm(instance=user.profile)
+        form = ProfileForm(instance=user.profiles)
+    
     
     return render(
         request,
@@ -335,3 +339,29 @@ def report_post(request, post_id):
     }
     # Use a basic template designed for a small popup window
     return render(request, 'report_form.html', context)
+
+# Change profile picture
+@login_required
+def change_pfp(request, username):
+
+    user = request.user
+    profile = request.user.profile
+
+    if username != user.username:
+        return HttpResponseForbidden("You cannot change others' profile pictures")
+
+    # Check the request method
+    if request.method == "POST":
+        form = PfpForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            pfp= form.save(commit=False)
+            # Create the post
+            pfp.save()
+
+            return redirect("user_profile", username=user.username)
+    else:
+        form = PfpForm(instance=profile)
+
+
+    # Render the template
+    return render(request, "pfp_change_form.html", {"form": form})
