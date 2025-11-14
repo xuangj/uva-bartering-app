@@ -105,6 +105,7 @@
       {% if posts %}
         <div class="row row-cols-1 row-cols-md-3 g-4">
           {% for post in posts %}
+          <!--Post format-->
             <div class="col">
               <div class="card h-100 shadow-sm">
                 {% if post.image %}
@@ -115,7 +116,19 @@
                               height: 200px" />
                 {% endif %}
                 <div class="card-body">
-                  <h5 class="card-title">{{ post.title }}</h5>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 class="card-title">{{ post.title }}</h5><div class="dropdown">
+                    <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.2rem;">
+                      <i class="bi bi-three-dots-vertical"></i> </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item text-danger" 
+                              href="#" 
+                              onclick="alert('Report feature is disabled for UI testing!'); return false;">
+                            <i class="bi bi-flag me-2"></i>Report Post
+                        </a></li>
+                    </ul>
+                  </div>
+                  </div>
                   <p>Category: <strong>{{ post.category }}</strong></p>
                   <p>Price: <strong>${{ post.price }}</strong></p>
                   <p class="card-text">{{ post.description|truncatechars:120 }}</p>
