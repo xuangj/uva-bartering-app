@@ -60,8 +60,6 @@
                         </div>
                         {% endif %}
 
-                        <!-- debugging statement, username autofill is buggy rn -->
-                        <!-- <p>DEBUG: username_form exists? {{ username_form|yesno:"yes,no" }}</p> -->
 
                         <!-- edit profile pop-up modal -->
                         <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModal" aria-hidden="true">
@@ -69,7 +67,6 @@
                                 <div class="modal-content rounded-4">
                                     <form method="post" action="{% url 'edit_profile' username=user.username %}" enctype="multipart/form-data">
                                         {% csrf_token %}
-                                        <!-- <p>Debug: username initial = {{ form.username.value }}</p> -->
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="profileModalLabel">Edit your profile</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
@@ -117,17 +114,28 @@
 
 
                         <!-- Profile Picture render & change -->
-                        <div class="mt-3 mb-4">
-                            <a href="{% url 'change_pfp' username=user.username %}" class="profile-pic-wrapper">
-                            {% if user.profile.pfp %}
-                                <img src="{{ user.profile.pfp.url }}" alt="Profile Picture" class="rounded-circle img-fluid">
+                        <div class="mt-3 mb-4 profile-pic-wrapper">
+                            <!-- only allow users to change their own pfps -->
+                            {% if user == request.user %}
+                                <a href="{% url 'change_pfp' username=user.username %}">
+                                    {% if user.profile.pfp %}
+                                        <img src="{{ user.profile.pfp.url }}" alt="Profile Picture" class="rounded-circle img-fluid">
+                                    {% else %}
+                                        <img src="https://cdn-icons-png.flaticon.com/512/8847/8847419.png" alt="Default Pfp" class="rounded-circle img-fluid">
+                                    {% endif %}
+                                    <div class="overlay">
+                                        <i class="bi bi-camera-fill"></i>
+                                    </div>
+                                </a>
+                                
+                            <!-- otherwise just load the pfp without allowing changes-->
                             {% else %}
-                                <img src="https://cdn-icons-png.flaticon.com/512/8847/8847419.png" alt="Default Pfp" class="rounded-circle img-fluid"; >
+                                {% if user.profile.pfp %}
+                                    <img src="{{ user.profile.pfp.url }}" alt="Profile Picture" class="rounded-circle img-fluid">
+                                {% else %}
+                                    <img src="https://cdn-icons-png.flaticon.com/512/8847/8847419.png" alt="Default Pfp" class="rounded-circle img-fluid">
+                                {% endif %}
                             {% endif %}
-                            <div class="overlay">
-                                <i class="bi bi-camera-fill"></i>
-                            </div>
-                            </a>
                         </div>
                         
                         
