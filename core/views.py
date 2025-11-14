@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -38,8 +39,10 @@ def login_redirect_view(request):
 @login_required
 def moderator_dashboard(request):
     user = request.user
+    profiles = Profile.objects.all()
+
     if user.is_staff:
-        return render(request, "moderator_dashboard.html")
+        return render(request, "moderator_dashboard.html", {"profiles": profiles})
     return HttpResponseForbidden("You are not allowed to access this page.")
 
 
@@ -179,6 +182,20 @@ def edit_profile(request, username):
         "profile.html",
         {"form": form, "user": user},
     )
+
+
+@login_required
+def delete_profile(request, profile_id):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not a moderator, you cannot access this action")
+    
+    profile = get_object_or_404(Profile, id=profile_id)
+    target_user = profile.user
+
+    target_user.delete()
+
+    return redirect("moderator_dashboard")
+
 
 
 # --- Trades --- #
