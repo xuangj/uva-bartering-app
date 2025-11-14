@@ -40,7 +40,7 @@
         </div>
     </nav>
     <!-- Bootstrap JS bundle (for dropdown functionality) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"> </script>
 </body>
 
 <!-- user info card -->
@@ -59,13 +59,15 @@
                             data-bs-toggle="modal" data-bs-target="#profileModal"></i>
                         </div>
 
+                        <p>DEBUG: username_form exists? {{ username_form|yesno:"yes,no" }}</p>
+
                         <!-- edit profile pop-up modal -->
                         <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModal" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content rounded-4">
-                                    <form method="POST" action="{% url 'edit_profile' username=user.username %}">
-                                        <p>Debug: username initial = {{ form.username.value }}</p>
+                                    <form method="post" action="{% url 'edit_profile' username=user.username %}" enctype="multipart/form-data">
                                         {% csrf_token %}
+                                        <p>Debug: username initial = {{ form.username.value }}</p>
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="profileModalLabel">Edit your profile</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
@@ -74,7 +76,7 @@
 
                                         <div class="modal-body text-start" style="padding-left: 2rem">
                                             <div class="mb-3">
-                                                <label for="{{ form.username.id_for_label }}" class="form-label" style="font-weight: bold">Username</label><br />
+                                                <label for="{{ username_form.username.id_for_label }}" class="form-label" style="font-weight: bold">Username</label><br />
                                                 {{ form.username }}
                                             </div>
                                             <div class="mb-3">
@@ -131,7 +133,7 @@
 
                         <!-- Display User Info -->
                         <h6 class="mb-2">{{user.profile.role}}</h6>
-                        <p><a href="mailto:{{user.email}}">Email</a></p>
+                        <!-- <p><a href="mailto:{{user.email}}">Email</a></p> -->
                         <!--{% if user.is_staff %}Moderator{% else %}Student{% endif %}
                             <span class="mx-3">|</span> -->
                         <div class="d-flex justify-content-center text-center mt-1 mb-3">
@@ -145,11 +147,11 @@
                                 </div>
                         </div>
 
-                        <div>
+                        <div class = "row justify-content-center">
                             {% if user.profile.sustainability_interests.all %}
                                 <ul>
                                     {% for interest in user.profile.sustainability_interests.all %}
-                                        <span class="badge bg-success me-1">{{ interest.name }}</span>
+                                        <span class="badge bg-success me-1 ce">{{ interest.name }}</span>
                                     {% endfor %}
                                 </ul>
                             {% else %}
@@ -157,7 +159,7 @@
                             {% endif %}
                         </div>
 
-                        <div>
+                        <div class = "row justify-content-center">
                             {% if user.profile.trading_interests.all %}
                                 <ul>
                                     {% for interest in user.profile.trading_interests.all %}
