@@ -3,7 +3,8 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render
 
 from .forms import PostForm, ProfileForm, PfpForm
-from .models import Post, Profile
+from .models import Post, Profile, User
+from django.shortcuts import get_object_or_404
 
 # --- Pages --- #
 
@@ -43,12 +44,17 @@ def moderator_dashboard(request):
 # Profile pages
 @login_required
 def user_profile(request, username):
-    user = request.user
-    if hasattr(user, 'profile'):
-        form = ProfileForm(instance=user.profile)
+
+    # identify the user you are on the page for
+    viewed_user = get_object_or_404(User, username=username)
+
+    # find their profile info if it exists
+    if hasattr(viewed_user, 'profile'):
+        form = ProfileForm(instance=viewed_user.profile)
     else:
-        form = None  # optional fallback
-    return render(request, 'profile.html', {'user': user, 'form': form})
+        form = None 
+
+    return render(request, 'profile.html', {'user': viewed_user, 'form': form})
 
 
 # --- Posts --- #

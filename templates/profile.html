@@ -24,10 +24,10 @@
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        Hello, <strong>{{ user.username|capfirst }}</strong>
+                        Hello, <strong>{{ request.user.username|capfirst }}</strong>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a>
+                        <li><a class="dropdown-item" href="{% url 'user_profile' username=request.user.username %}">Profile</a>
                         </li>
                         <li><a class="dropdown-item" href="{% url 'inbox' %}">Inbox</a></li>
                         {% if user.is_authenticated and user.is_staff %}
@@ -52,13 +52,15 @@
                 <div class="card" style="border-radius: 15px;">
                     <div class="card-body text-center">
 
-
+                        {% if request.user == user %}
                         <!-- edit profile icon, top left -->
                         <div class="mt-1 mb-1 text-start position-relative">
                             <i class="bi bi-pencil-square fs-4 profile-icon"
                             data-bs-toggle="modal" data-bs-target="#profileModal"></i>
                         </div>
+                        {% endif %}
 
+                        <!-- debugging statement, username autofill is buggy rn -->
                         <p>DEBUG: username_form exists? {{ username_form|yesno:"yes,no" }}</p>
 
                         <!-- edit profile pop-up modal -->

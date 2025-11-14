@@ -28,7 +28,7 @@
                 Hello, <strong>{{ user.username|capfirst }}</strong>
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'user_profile' username=request.user.username %}">Profile</a>
                 <li><a class="dropdown-item" href="{% url 'inbox' %}">Inbox</a></li>
                 {% if user.is_authenticated and user.is_staff %}
                   <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Moderator Dashboard</a></li>
