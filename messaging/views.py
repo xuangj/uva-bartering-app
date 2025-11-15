@@ -64,7 +64,6 @@ def groupchat_select_users(request):
     }
     return render(request, "create_groupchat.html", context)
 
-
 # Inbox page
 @login_required
 def inbox(request):
