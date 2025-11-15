@@ -95,6 +95,16 @@ def moderator_dashboard(request):
     if user.is_staff:
         return render(request, "moderator_dashboard.html", {"profiles": profiles})
     return HttpResponseForbidden("You are not allowed to access this page.")
+#Delete account view
+@login_required
+def delete_account(request):
+    if request.method == "POST":
+        user = request.user
+        user.delete()
+        messages.success(request, "Your account has been permanently deleted.")
+        return redirect("account_login")  # or homepage
+
+    return redirect("user_profile", username=request.user.username)
 
 
 # Profile pages

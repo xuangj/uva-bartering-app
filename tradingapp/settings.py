@@ -172,6 +172,7 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",  # default
     "allauth.account.auth_backends.AuthenticationBackend",  # allauth
 ]
+ACCOUNT_DELETION_PERMISSION_REQUIRED = False
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {

@@ -4,7 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Max
 from core.models import Trade
-
+from django.contrib import messages
 from .models import ChatThread, Message
 
 # returns existing DM thread btwn two users if it exists, or create a new one if not
@@ -63,6 +63,7 @@ def groupchat_select_users(request):
         "selected_ids": selected_ids,
     }
     return render(request, "create_groupchat.html", context)
+
 
 # Inbox page
 @login_required
