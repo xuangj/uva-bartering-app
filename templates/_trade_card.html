@@ -11,7 +11,10 @@
             </h5>
 
             <p class="card-text mb-2">
-                <strong> Item Offered:</strong> {{ trade.item_offered }}<br />
+                <strong>Item Offered:</strong>
+                    {% for post in trade.offered_posts.all %}
+                        {{ post.title }}<br>
+                    {% endfor %}          
                 <strong> Item Requested:</strong> {{ trade.item_requested }}
             </p>
 

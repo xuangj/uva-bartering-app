@@ -390,6 +390,34 @@ def delete_trade_offer(request, trade_id):
 
     return redirect("my_trades")
 
+
+@login_required
+def make_trade_offer(request, post_id):
+    requested_post = get_object_or_404(Post, id=post_id)
+
+    if request.method == "POST":
+        form = TradeForm(request.POST, user=request.user)
+        if form.is_valid():
+            trade = form.save(commit=False)
+            trade.offerer = request.user
+            trade.receiver = requested_post.poster
+            trade.item_requested = requested_post
+            trade.save()
+
+            # Wrap single Post in a list for ManyToManyField
+            trade.offered_posts.set([form.cleaned_data['offered_posts']])
+
+            messages.success(request, "Trade offer sent!")
+            return redirect('home')
+    else:
+        form = TradeForm(user=request.user)
+
+    return render(request, "trade_offer_form.html", {
+        "form": form,
+        "requested_post": requested_post
+    })
+
+
 @login_required
 def report_post(request, post_id):
     # Get the post being reported
