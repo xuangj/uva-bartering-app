@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Q
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, BooleanField
 
 
 from .forms import PostForm, ProfileForm, ReportForm, TradeForm, PfpForm
@@ -72,8 +72,7 @@ def home(request):
             status='Pending'
         )
         posts = posts.annotate(user_has_pending_trade=Exists(pending_trades))
-    else:
-        posts = posts.annotate(user_has_pending_trade=False)
+
 
     context = {
         'posts': posts,
