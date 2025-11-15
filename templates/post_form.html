@@ -33,8 +33,11 @@
 
                 <div class="card shadow-sm">
                     <div class="card-body">
-
-                        <h2 class="fw-bold mb-3">Post a New Item</h2>
+                        {% if is_edit %}
+                            <h2 class="fw-bold-mb-3">Edit this listing</h2>
+                        {% else %}
+                            <h2 class="fw-bold mb-3">Post a New Item</h2>
+                        {% endif %}
                         <p class="text-muted mb-4">Upload an image and fill in the details below.</p>
 
                         <!-- ERROR DISPLAY -->

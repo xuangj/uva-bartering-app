@@ -140,8 +140,14 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                         <li><a class="dropdown-item text-danger" 
                               href="{% url 'report_post' post_id=post.id %}">
-                              <i class="bi bi-flag me-2"></i>Report Post
-                        </a></li>
+                              <i class="bi bi-flag me-2"></i>Report Post</a>
+                            {% if post.poster == request.user %}
+                              <a class="dropdown-item"
+                              href="{% url 'edit_post' post_id=post.id %}">
+                              <i class="bi bi-pencil me-2"></i>Edit Post</a>
+                            {% endif %}
+                        </li>
+                        
                     </ul>
                   </div>
                   </div>
