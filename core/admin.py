@@ -1,3 +1,5 @@
+# core/admin.py
+
 from django.contrib import admin
 
 from .models import Post, Profile, SustainabilityInterests, TradingInterests, Trade
@@ -30,7 +32,8 @@ class TradingInterestsAdmin(admin.ModelAdmin):
     users_list.short_description = "Users"
 
 
+
 @admin.register(Trade)
 class TradeAdmin(admin.ModelAdmin):
-    list_display = ("id", "userOne", "userTwo", "item_offered", "item_requested", "status", "post_reference" )
-    list_filter = ("created_at",)
+    list_display = ("id", "offerer", "receiver", "item_requested", "status")
+    list_filter = ("created_at", "status")
