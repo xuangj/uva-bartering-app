@@ -12,6 +12,9 @@ from messaging.views import chat, get_or_create_dm_thread, inbox, start_chat, gr
 urlpatterns = [
     path("", home, name="home"),
     path("accounts/", include("allauth.urls")),
+    
+    
+
     path("admin/", admin.site.urls),
     path("redirect/", login_redirect_view, name="login_redirect"),
     path("moderator/", moderator_dashboard, name="moderator_dashboard"),

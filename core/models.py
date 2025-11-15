@@ -98,7 +98,9 @@ class Post(models.Model):
     
     poster = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
+    
     item_offered = models.CharField(max_length=100, default=title)
+    
     description = models.TextField()
     image = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
     category = models.CharField(max_length=50, choices=CATEGORY, default='Miscellaneous')
