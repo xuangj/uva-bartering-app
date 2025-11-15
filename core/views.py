@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Q
+from django.db.models import Exists, OuterRef
+
 
 from .forms import PostForm, ProfileForm, ReportForm, TradeForm, PfpForm
 from .models import Post, Profile, Report, Trade, User
@@ -61,6 +63,17 @@ def home(request):
     else:
         # Default sort (Newest)
         posts = posts.order_by('-created_at')
+
+    # add a flag for pending trades
+    if request.user.is_authenticated:
+        pending_trades = Trade.objects.filter(
+            offerer=request.user,
+            item_requested=OuterRef('pk'),
+            status='Pending'
+        )
+        posts = posts.annotate(user_has_pending_trade=Exists(pending_trades))
+    else:
+        posts = posts.annotate(user_has_pending_trade=False)
 
     context = {
         'posts': posts,
@@ -395,7 +408,19 @@ def delete_trade_offer(request, trade_id):
 def make_trade_offer(request, post_id):
     requested_post = get_object_or_404(Post, id=post_id)
 
+    # Check if a pending trade already exists
+    existing_trade = Trade.objects.filter(
+        offerer=request.user,
+        item_requested=requested_post,
+        status='Pending'
+    ).first()
+
+    # else
     if request.method == "POST":
+        # if user has already made a request for the item
+        if existing_trade:
+            messages.warning(request, "You have already submitted a trade offer for this item.")
+
         form = TradeForm(request.POST, user=request.user)
         if form.is_valid():
             trade = form.save(commit=False)
@@ -414,7 +439,7 @@ def make_trade_offer(request, post_id):
 
     return render(request, "trade_offer_form.html", {
         "form": form,
-        "requested_post": requested_post
+        "requested_post": requested_post,
     })
 
 

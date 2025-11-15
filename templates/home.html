@@ -172,13 +172,18 @@
                   <p class="card-text mt-3">{{ post.description|truncatechars:120 }}</p>
                 </div>
 
-                <!-- MAKE TRADE OFFER BUTTON -->
-                {% if request.user.is_authenticated and request.user != post.poster %}
+                <!-- CONDITIONAL MAKE TRADE OFFER BUTTON -->
+              {% if request.user.is_authenticated and request.user != post.poster %}
+                {% if post.user_has_pending_trade %}
+                  <button class="btn btn-warning w-100" disabled>
+                      <i class="bi bi-ban me-1"></i> Offer Already Sent
+                  </button>
+                {% else %}
                   <a href="{% url 'make_trade_offer' post.id %}" class="btn btn-success">
                       <i class="bi bi-arrow-left-right me-1"></i> Make Offer
                   </a>
-                {% endif %} 
-
+                {% endif %}
+              {% endif %}
 
                 <div class="card-footer text-muted">
                   Posted by <strong>{{ post.poster.username }}</strong>
