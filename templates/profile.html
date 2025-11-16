@@ -40,23 +40,26 @@
                         </div>
                         {% endif %}
 
-                        <!-- only allow staff to ban users -->
+                        <!-- BAN FUNCTIONALITY (staff only) -->
                         {% if request.user.is_staff and request.user != user %}
                         <div class="mt-1 mb-1 text-start position-relative">
-                            {% if user.is_active %}
-                            <!-- Unban button -->
-                            <a href="{% url 'toggle_ban_user' user.username %}" class="btn btn-danger">
-                                <i class="bi bi-slash-circle me-1"></i> Ban User
-                            </a>
-                            {% else %}
-                            <!-- Ban button -->
-                            <a href="{% url 'toggle_ban_user' user.username %}" class="btn btn-success">
-                                <i class="bi bi-unlock me-1"></i> Unban User
-                            </a>
-                            {% endif %}
+                            <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.2rem;">
+                            <i class="bi bi-three-dots-vertical"></i> </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                                {% if user.is_active %}
+                                <!-- Unban button -->
+                                <li><a href="{% url 'toggle_ban_user' user.username %}" class="dropdown-item text-danger">
+                                    <i class="bi bi-slash-circle me-1"></i> Ban
+                                </a></li>
+                                {% else %}
+                                <!-- Ban button -->
+                                <li><a href="{% url 'toggle_ban_user' user.username %}" class="dropdown-item text-success">
+                                    <i class="bi bi-unlock me-1"></i> Unban
+                                </a></li>
+                                {% endif %}
+                            </ul>
                         </div>
                         {% endif %}
-
 
 
                         <!-- edit profile pop-up modal -->
