@@ -14,7 +14,7 @@
                 <li><a class="dropdown-item" href="{% url 'inbox' %}">Inbox</a></li>
                 <li><a class="dropdown-item" href="{% url 'my_trades' %}">My Trades</a></li>
                 {% if user.is_authenticated and user.is_staff %}
-                  <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Moderator Dashboard</a></li>
+                  <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Mod dashboard</a></li>
                 {% endif %}
                 <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
               </ul>

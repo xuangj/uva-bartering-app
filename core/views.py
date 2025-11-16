@@ -60,12 +60,25 @@ def moderator_dashboard(request):
 # Profile pages
 @login_required
 def user_profile(request, username):
-    user = request.user
-    if hasattr(user, 'profile'):
-        form = ProfileForm(instance=user.profile)
+
+    # Load the user being viewed
+    profile_user = get_object_or_404(User, username=username)
+
+    # Only allow editing if it's their own profile
+    if request.user == profile_user:
+        form = ProfileForm(instance=profile_user.profile)
     else:
-        form = None  # optional fallback
-    return render(request, 'profile.html', {'user': user, 'form': form})
+        form = None  # do NOT show edit form for other users
+
+    return render(
+        request,
+        "profile.html",
+        {
+            "profile_user": profile_user,  # who we are viewing
+            "form": form,                  # edit form (only for owner)
+            "logged_user": request.user,   # optional
+        },
+    )
 
 
 # --- Posts --- #
@@ -175,23 +188,26 @@ def delete_post(request, post_id: int):
 
 @login_required
 def edit_profile(request, username):
-    user = request.user
-
-    if username != user.username:
+    if username != request.user.username:
         return HttpResponseForbidden("You can only edit your own profile")
 
+    profile_user = request.user
+
     if request.method == "POST":
-        form = ProfileForm(request.POST, instance=user.profile)
+        form = ProfileForm(request.POST, instance=profile_user.profile)
         if form.is_valid():
             form.save()
-            return redirect("user_profile", username=user.username)
+            return redirect("user_profile", username=profile_user.username)
     else:
-        form = ProfileForm(instance=user.profile)
-    
+        form = ProfileForm(instance=profile_user.profile)
+
     return render(
         request,
         "profile.html",
-        {"form": form, "user": user},
+        {
+            "profile_user": profile_user,
+            "form": form,
+        },
     )
 
 
