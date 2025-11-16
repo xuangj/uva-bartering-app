@@ -1,15 +1,14 @@
 # core/views.py
 
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
-from django.db.models import Q
-from django.db.models import Exists, OuterRef, BooleanField
-
+from django.db.models import Q, Exists, OuterRef
 
 from .forms import PostForm, ProfileForm, ReportForm, TradeForm, PfpForm
-from .models import Post, Profile, Report, Trade, User
+from .models import Post, Profile, Report, Trade
 
 from messaging.views import get_or_create_dm_thread
 from messaging.utils import (
@@ -20,16 +19,13 @@ from messaging.utils import (
 )
 
 
-# --- Pages --- #
+# Homepage
 
-
-# Render listings page
 def home(request):
-    """Render homepage with all posts (and optional search filters)."""
     posts = Post.objects.filter(is_available=True).order_by("-created_at")
 
-    # Category Filter
-    catergory_filter = request.GET.get("category")
+    # Filters
+    category_filter = request.GET.get("category")
     name_search = request.GET.get("name")
     price_min = request.GET.get("price_min")
     price_max = request.GET.get("price_max")
@@ -37,34 +33,34 @@ def home(request):
     weight_filter = request.GET.get("weight")
     sort_by = request.GET.get("sort_by")
 
-    if catergory_filter:
-        posts = posts.filter(category=catergory_filter)
+    if category_filter:
+        posts = posts.filter(category=category_filter)
     if general_size_filter:
         posts = posts.filter(general_size=general_size_filter)
     if weight_filter:
         posts = posts.filter(weight=weight_filter)
     if name_search:
         posts = posts.filter(title__icontains=name_search)
-    if price_min and price_min.isdigit(): # Ensure input is valid before filtering
+    if price_min and price_min.isdigit():
         posts = posts.filter(price__gte=price_min)
-    if price_max and price_max.isdigit(): # Ensure input is valid before filtering
-        posts = posts.filter(price__lte=price_max)    
+    if price_max and price_max.isdigit():
+        posts = posts.filter(price__lte=price_max)
 
+    # Sorting
     if sort_by == 'oldest':
         posts = posts.order_by('created_at')
     elif sort_by == 'price_asc':
         posts = posts.order_by('price')
     elif sort_by == 'price_desc':
-        posts = posts.order_by('-price') # Prefix with '-' for descending
+        posts = posts.order_by('-price')
     elif sort_by == 'title_asc':
         posts = posts.order_by('title')
     elif sort_by == 'title_desc':
-        posts = posts.order_by('-title') # Prefix with '-' for descending
+        posts = posts.order_by('-title')
     else:
-        # Default sort (Newest)
         posts = posts.order_by('-created_at')
 
-    # add a flag for pending trades
+    # Pending trade flag
     if request.user.is_authenticated:
         pending_trades = Trade.objects.filter(
             offerer=request.user,
@@ -73,113 +69,134 @@ def home(request):
         )
         posts = posts.annotate(user_has_pending_trade=Exists(pending_trades))
 
-
     context = {
         'posts': posts,
         'categories': Post.CATEGORY,
         'general_sizes': Post.GENERAL_SIZES,
         'weights': Post.WEIGHT_CATEGORIES,
     }
-    name_query = request.GET.get("name")
-    if name_query:
-        posts = posts.filter(title__icontains=name_query)
 
     return render(request, "home.html", context)
 
 
-# Handle default login
+# Login redirect
+
 @login_required
 def login_redirect_view(request):
-    user = request.user
-
-    if user.is_staff:
+    if request.user.is_staff:
         return redirect("moderator_dashboard")
-    else:
-        return redirect("home")
+    return redirect("home")
 
 
-# Only load moderator dashboard if the user is staff
+# Moderator Dashboard
+
 @login_required
 def moderator_dashboard(request):
-    user = request.user
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not allowed to access this page.")
+    
     profiles = Profile.objects.all()
 
-    if user.is_staff:
-        return render(request, "moderator_dashboard.html", {"profiles": profiles})
-    return HttpResponseForbidden("You are not allowed to access this page.")
-#Delete account view
-@login_required
-def delete_account(request):
-    if request.method == "POST":
-        user = request.user
-        user.delete()
-        messages.success(request, "Your account has been permanently deleted.")
-        return redirect("account_login")  # or homepage
+    name_query = request.GET.get("name")
+    role_query = request.GET.get("role")
 
-    return redirect("user_profile", username=request.user.username)
+    if name_query:
+        profiles = profiles.filter(user__username__icontains=name_query)
+    if role_query:
+        profiles = profiles.filter(role=role_query)
+
+    return render(request, "moderator_dashboard.html", {"profiles": profiles})
 
 
-# Profile pages
+# View Profile
+
 @login_required
 def user_profile(request, username):
+    profile_user = get_object_or_404(User, username=username)
 
-    # identify the user you are on the page for
-    viewed_user = get_object_or_404(User, username=username)
+    # Only allow edit form for the owner
+    form = ProfileForm(instance=profile_user.profile) if request.user == profile_user else None
 
-    # find their profile info if it exists
-    if hasattr(viewed_user, 'profile'):
-        form = ProfileForm(instance=viewed_user.profile)
+    return render(
+        request,
+        "profile.html",
+        {
+            "profile_user": profile_user,   # person being viewed
+            "logged_user": request.user,    # current user viewing page
+            "form": form,
+        },
+    )
+
+
+# Edit Profile
+
+@login_required
+def edit_profile(request, username):
+    if username != request.user.username:
+        return HttpResponseForbidden("You can only edit your own profile.")
+
+    profile_user = request.user
+    profile = profile_user.profile
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect("user_profile", username=profile_user.username)
     else:
-        form = None 
+        form = ProfileForm(instance=profile)
 
-    return render(request, 'profile.html', {'user': viewed_user, 'form': form})
+    return render(request, "profile.html", {
+        "profile_user": profile_user,
+        "form": form,
+    })
 
 
-# --- Posts --- #
-# Allow a user to create a new Post
+# Moderator Delete User
+
+@login_required
+def delete_profile(request, profile_id):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not a moderator.")
+
+    profile = get_object_or_404(Profile, id=profile_id)
+    profile.user.delete()
+
+    return redirect("moderator_dashboard")
+
+
+# Create Post
+
 @login_required
 def post_create(request):
-    # Check the request method
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             new_post = form.save(commit=False)
-
-            # Get the user profile
-            try:
-                user = request.user
-            except Profile.DoesNotExist:
-                return HttpResponseForbidden("User profile not found.")
-
-            # Create the post
-            new_post.poster = user
+            new_post.poster = request.user
             new_post.save()
-
             return redirect("home")
     else:
-        # Handle GET request (user first opens the page)
-        # Create an empty form instance
         form = PostForm()
 
-    # Render the template
     return render(request, "post_form.html", {"form": form, "is_edit": False})
 
 
+# View Post + Offer Trade
+
 @login_required
-def view_post(request, post_id: int) -> HttpResponse:
+def view_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     user = request.user
 
-    # Can't trade with yourself
     can_trade = user != post.poster
 
-    # Is there already a pending trade from this user on this post?
     existing_trade = None
     if can_trade:
         existing_trade = Trade.objects.filter(
             offerer=user,
             item_requested=post,
-            status='Pending',
+            status='Pending'
         ).first()
 
     if request.method == "POST":
@@ -196,52 +213,41 @@ def view_post(request, post_id: int) -> HttpResponse:
             trade.offerer = user
             trade.receiver = post.poster
             trade.item_requested = post
-            trade.status = 'Pending'
             trade.save()
-            form.save_m2m()  # for offered_posts
+            form.save_m2m()
 
-            # Chat notification
             notify_trade_offer(trade)
-
             messages.success(request, "Trade offer sent!", extra_tags="trade")
 
             return redirect("my_trades")
     else:
-        # Only show the form if:
-        # - user is not the poster
-        # - no pending trade already exists
         form = TradeForm(user=user) if can_trade and not existing_trade else None
 
-    return render(
-        request,
-        "post.html",
-        {
-            'post': post,
-            'form': form,
-            'existing_trade': existing_trade,
-            'can_trade': can_trade,
-        },
-    )
+    return render(request, "post.html", {
+        "post": post,
+        "form": form,
+        "existing_trade": existing_trade,
+        "can_trade": can_trade,
+    })
 
 
-# Edits existing post
+# Edit Post
+
 @login_required
-def edit_post(request, post_id: int):
+def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
     if Trade.objects.filter(item_requested=post, status='Accepted').exists():
-        return HttpResponseForbidden("You can't edit a post after it's been traded.")
-    
+        return HttpResponseForbidden("You can't edit a traded post.")
+
     if post.poster != request.user:
         return HttpResponseForbidden("You can only edit your own posts.")
-    
+
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
-            edited_post = form.save(commit=False)
-            edited_post.poster = post.poster
-            edited_post.save()
-            messages.success(request, "Post updated successfully!")
+            form.save()
+            messages.success(request, "Post updated!")
             return redirect("view_post", post_id=post.id)
     else:
         form = PostForm(instance=post)
@@ -249,105 +255,63 @@ def edit_post(request, post_id: int):
     return render(request, "post_form.html", {"form": form, "is_edit": True})
 
 
-# Delete post
+# Delete Post
+
 @login_required
-def delete_post(request, post_id: int):
+def delete_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
     if Trade.objects.filter(item_requested=post, status='Accepted').exists():
-        return HttpResponseForbidden("You can't delete a post after it's been traded.")
-    
-    if request.user.is_superuser:
+        return HttpResponseForbidden("You can't delete a traded post.")
+
+    if request.user.is_superuser or post.poster == request.user:
         post.delete()
         return redirect("home")
 
-    if post.poster == request.user:
-        post.delete()
-        return redirect("home")    
+    return HttpResponseForbidden("You can only delete your own posts.")
 
-    return HttpResponseForbidden("You can only delete your own posts")
-        
 
-# --- Profile --- #
+# My Trades Page
 
 @login_required
-def edit_profile(request, username):
-    user = request.user    
-    if username != user.username:
-        return HttpResponseForbidden("You can only edit your own profile")
-
-    if request.method == "POST":
-        form = ProfileForm(request.POST, instance=user.profile)
-       #  print("DEBUG username initial:", form.fields['username'].initial)
-        if form.is_valid():
-            form.save()
-            return redirect("user_profile", username=user.username)
-    else:
-        form = ProfileForm(instance=user.profiles)
-    
-    
-    return render(
-        request,
-        "profile.html",
-        {"form": form, "user": user},
-    )
-
-@login_required
-def delete_profile(request, profile_id):
-    profile = get_object_or_404(Profile, id=profile_id)
-
-    
-# --- Trades --- #
-
-
-# See all active trades (offers and listings)
-@login_required
-def my_trades(request) -> HttpResponse:
+def my_trades(request):
     user = request.user
 
-    pending_trades = Trade.objects.filter(
-        Q(offerer=user) | Q(receiver=user),
-        status='Pending'
-    ).select_related('item_requested', 'offerer', 'receiver').prefetch_related('offered_posts')
+    def trades(status):
+        return Trade.objects.filter(
+            Q(offerer=user) | Q(receiver=user),
+            status=status
+        ).select_related('item_requested', 'offerer', 'receiver').prefetch_related('offered_posts')
 
-    accepted_trades = Trade.objects.filter(
-        Q(offerer=user) | Q(receiver=user),
-        status='Accepted'
-    ).select_related('item_requested', 'offerer', 'receiver').prefetch_related('offered_posts')
+    context = {
+        "pending_trades": trades('Pending'),
+        "accepted_trades": trades('Accepted'),
+        "denied_trades": trades('Denied'),
+    }
 
-    denied_trades = Trade.objects.filter(
-        Q(offerer=user) | Q(receiver=user),
-        status='Denied'
-    ).select_related('item_requested', 'offerer', 'receiver').prefetch_related('offered_posts')
-
-    return render(
-        request,
-        "my_trades.html",
-        {
-            "pending_trades": pending_trades,
-            "accepted_trades": accepted_trades,
-            "denied_trades": denied_trades,
-        },
-    )
+    return render(request, "my_trades.html", context)
 
 
-# view individual trade, see original post and possible offer
+# View Trade
+
 @login_required
-def view_trade(request, trade_id: int) -> HttpResponse:
+def view_trade(request, trade_id):
     trade = get_object_or_404(
         Trade.objects.select_related('item_requested', 'offerer', 'receiver').prefetch_related('offered_posts'),
-        id=trade_id,
+        id=trade_id
     )
 
     if request.user not in (trade.offerer, trade.receiver) and not request.user.is_staff:
         return HttpResponseForbidden("You are not part of this trade.")
 
-    post = trade.item_requested
+    return render(request, "trade.html", {
+        "trade": trade,
+        "post": trade.item_requested,
+    })
 
-    return render(request, "trade.html", {'trade': trade, 'post': post})
 
+# Accept Trade
 
-# OP can accept trade offer
 @login_required
 def accept_trade(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id, receiver=request.user)
@@ -359,24 +323,21 @@ def accept_trade(request, trade_id):
     trade.status = 'Accepted'
     trade.save()
 
-    # Take down the requested post
-    requested_post = trade.item_requested
-    requested_post.is_available = False
-    requested_post.save()
+    trade.item_requested.is_available = False
+    trade.item_requested.save()
 
-    # Take down all offered posts
-    for offered_post in trade.offered_posts.all():
-        offered_post.is_available = False
-        offered_post.save()
+    for offered in trade.offered_posts.all():
+        offered.is_available = False
+        offered.save()
 
-    # Chat notification
     notify_trade_accepted(trade, request.user)
 
     messages.success(request, "Trade accepted!", extra_tags="trade")
-    return redirect('my_trades')
+    return redirect("my_trades")
 
 
-# OP can decline trade offer
+# Deny Trade
+
 @login_required
 def deny_trade(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id, receiver=request.user)
@@ -388,14 +349,14 @@ def deny_trade(request, trade_id):
     trade.status = 'Denied'
     trade.save()
 
-    # Chat notification
     notify_trade_denied(trade, request.user)
 
     messages.info(request, "Trade denied.", extra_tags="trade")
-    return redirect('my_trades')
+    return redirect("my_trades")
 
 
-# Offerer can rescind their offer
+# Withdraw Trade Offer
+
 @login_required
 def delete_trade_offer(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id, offerer=request.user)
@@ -404,14 +365,57 @@ def delete_trade_offer(request, trade_id):
         messages.error(request, "You can only withdraw pending trades.")
         return redirect("my_trades")
 
-    # Chat notification
     notify_trade_cancelled(trade, request.user)
 
     trade.delete()
     messages.info(request, "Trade offer withdrawn.", extra_tags="trade")
-
     return redirect("my_trades")
 
+
+# Report Post
+
+@login_required
+def report_post(request, post_id):
+    reported_post = get_object_or_404(Post, id=post_id)
+    reported_user = reported_post.poster
+
+    if request.method == "POST":
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reporter = request.user
+            report.reported_user = reported_user
+            report.reported_post = reported_post
+            report.save()
+            return redirect("home")
+    else:
+        form = ReportForm()
+
+    return render(request, "report_form.html", {
+        "reported_post": reported_post,
+        "reported_user": reported_user,
+        "form": form,
+    })
+
+
+# Change Profile Picture
+
+@login_required
+def change_pfp(request, username):
+    if username != request.user.username:
+        return HttpResponseForbidden("You cannot change someone else's picture.")
+
+    profile = request.user.profile
+
+    if request.method == "POST":
+        form = PfpForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect("user_profile", username=username)
+    else:
+        form = PfpForm(instance=profile)
+
+    return render(request, "pfp_change_form.html", {"form": form})
 
 @login_required
 def make_trade_offer(request, post_id):
@@ -453,59 +457,11 @@ def make_trade_offer(request, post_id):
 
 
 @login_required
-def report_post(request, post_id):
-    # Get the post being reported
-    reported_post = get_object_or_404(Post, id=post_id)
-    reported_user = reported_post.poster # Assuming reported_post.poster is a Profile, and Profile has a 'user' field
-    
-    if request.method == 'POST':
-        form = ReportForm(request.POST)
-        if form.is_valid():
-            # Save the form data (comments only)
-            new_report = form.save(commit=False)
-            
-            # Manually assign the required relationship fields
-            new_report.reporter = request.user
-            new_report.reported_user = reported_user
-            new_report.reported_post = reported_post
-            
-            new_report.save()
-            
-            # Since this is a popup window, we can send a simple success message
-            return redirect('home')  # Redirect to home or any other appropriate page
-    else:
-        form = ReportForm()
-
-    context = {
-        'reported_post': reported_post,
-        'reported_user': reported_user,
-        'form': form
-    }
-    # Use a basic template designed for a small popup window
-    return render(request, 'report_form.html', context)
-
-# Change profile picture
-@login_required
-def change_pfp(request, username):
-
-    user = request.user
-    profile = request.user.profile
-
-    if username != user.username:
-        return HttpResponseForbidden("You cannot change others' profile pictures")
-
-    # Check the request method
+def delete_account(request):
     if request.method == "POST":
-        form = PfpForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            pfp= form.save(commit=False)
-            # Create the post
-            pfp.save()
+        user = request.user
+        user.delete()
+        messages.success(request, "Your account has been permanently deleted.")
+        return redirect("account_login")  # or homepage
 
-            return redirect("user_profile", username=user.username)
-    else:
-        form = PfpForm(instance=profile)
-
-
-    # Render the template
-    return render(request, "pfp_change_form.html", {"form": form})
+    return redirect("user_profile", username=request.user.username)

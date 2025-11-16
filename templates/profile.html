@@ -5,9 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>UVA Trading App</title>
-    <!-- Bootstrap CSS -->
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- profile pic change overlay -->
@@ -16,69 +16,79 @@
 </head>
 
 <body>
+
     <!-- NAV BAR -->
     {% include '_navbar.html'%}
-    
-    <!-- Bootstrap JS bundle (for dropdown functionality) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"> </script>
-</body>
 
-<!-- user info card -->
-<!-- MODIFIED FROM: https://mdbootstrap.com/docs/standard/extended/profiles/ -->
-<section class="vh-100">
-    <div class="container py-5 h-100">
-        <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col-md-12 col-xl-4">
-                <div class="card" style="border-radius: 15px;">
-                    <div class="card-body text-center">
+    <section class="vh-100">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-md-12 col-xl-4">
 
-                        {% if request.user == user %}
-                        <!-- edit profile icon, top left -->
-                        <div class="mt-1 mb-1 text-start position-relative">
-                            <i class="bi bi-pencil-square fs-4 profile-icon"
-                            data-bs-toggle="modal" data-bs-target="#profileModal"></i>
-                        </div>
-                        {% endif %}
+                    <div class="card" style="border-radius: 15px;">
+                        <div class="card-body text-center">
 
+                            <!-- PROFILE PICTURE -->
+                            <div class="mt-3 mb-4">
+                                <img src="https://cdn-icons-png.flaticon.com/512/8847/8847419.png"
+                                     class="rounded-circle img-fluid"
+                                     style="width: 100px;" />
+                            </div>
 
-                        <!-- edit profile pop-up modal -->
-                        <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModal" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content rounded-4">
-                                    <form method="post" action="{% url 'edit_profile' username=user.username %}" enctype="multipart/form-data">
-                                        {% csrf_token %}
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="profileModalLabel">Edit your profile</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                                            </button>
-                                        </div>
+                            <!-- USERNAME -->
+                            <h4 class="mb-2">{{ profile_user.username }}</h4>
 
-                                        <div class="modal-body text-start" style="padding-left: 2rem">
-                                            <div class="mb-3">
-                                                <label for="{{ form.user.id_for_label }}" class="form-label" style="font-weight: bold">Username</label><br />
-                                                {{ form.username }}
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="{{ form.bio.id_for_label }}" class="form-label" style="font-weight: bold">Bio</label><br />
-                                                {{ form.bio }}
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="{{ form.role.id_for_label }}" class="form-label">Role</label><br />
-                                                {{ form.role }}
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="{{form.sustainability_interests.id_for_label }}" class="form-label">Sustainability Interests</label>
-                                                {{ form.sustainability_interests }}
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="{{form.trading_interests.id_for_label }}" class="form-label">Trading Interests</label>
-                                                {{ form.trading_interests }}
+                            <!-- EDIT PROFILE BUTTON (only owner) -->
+                            {% if request.user == profile_user %}
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#profileModal">
+                                Edit Profile
+                            </button>
+                            {% endif %}
+
+                            <!-- MODAL: EDIT PROFILE (only owner) -->
+                            {% if request.user == profile_user %}
+                            <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModal" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content rounded-4">
+
+                                        <form method="POST" action="{% url 'edit_profile' username=profile_user.username %}">
+                                            {% csrf_token %}
+
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Edit your profile</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
 
-                                            {% if form.errors %}
-                                            <div class="text-danger mt-3">
-                                                Please correct the errors below:
-                                                {{ form.errors }}
+                                            <div class="modal-body text-start" style="padding-left: 2rem">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Bio</label>
+                                                    {{ form.bio }}
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Role</label>
+                                                    {{ form.role }}
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Sustainability Interests</label>
+                                                    {{ form.sustainability_interests }}
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Trading Interests</label>
+                                                    {{ form.trading_interests }}
+                                                </div>
+
+                                                {% if form.errors %}
+                                                <div class="text-danger mt-3">
+                                                    Please correct the errors below:
+                                                    {{ form.errors }}
+                                                </div>
+                                                {% endif %}
                                             </div>
                                             {% endif %}
                                         </div>
@@ -100,88 +110,77 @@
                                     
                                 </div>
                             </div>
-                        </div>
-
-
-                        <!-- Profile Picture render & change -->
-                        <div class="mt-3 mb-4 profile-pic-wrapper">
-                            <!-- only allow users to change their own pfps -->
-                            {% if user == request.user %}
-                                <a href="{% url 'change_pfp' username=user.username %}">
-                                    {% if user.profile.pfp %}
-                                        <img src="{{ user.profile.pfp.url }}" alt="Profile Picture" class="rounded-circle img-fluid">
-                                    {% else %}
-                                        <img src="https://cdn-icons-png.flaticon.com/512/8847/8847419.png" alt="Default Pfp" class="rounded-circle img-fluid">
-                                    {% endif %}
-                                    <div class="overlay">
-                                        <i class="bi bi-camera-fill"></i>
-                                    </div>
-                                </a>
-                                
-                            <!-- otherwise just load the pfp without allowing changes-->
-                            {% else %}
-                                {% if user.profile.pfp %}
-                                    <img src="{{ user.profile.pfp.url }}" alt="Profile Picture" class="rounded-circle img-fluid">
-                                {% else %}
-                                    <img src="https://cdn-icons-png.flaticon.com/512/8847/8847419.png" alt="Default Pfp" class="rounded-circle img-fluid">
-                                {% endif %}
                             {% endif %}
-                        </div>
-                        
-                        
-                        <h4 class="mb-2">{{user.username}}</h4>
 
-                        <!-- Display User Info -->
-                        <h6 class="mb-2">{{user.profile.role}}</h6>
-                        <!-- <p><a href="mailto:{{user.email}}">Email</a></p> -->
-                        <!--{% if user.is_staff %}Moderator{% else %}Student{% endif %}
-                            <span class="mx-3">|</span> -->
-                        <div class="d-flex justify-content-center text-center mt-1 mb-3">
-                            <div class="px-3">
-                                <p class="text-muted mb-0">
-                                    {% if user.profile and user.profile.bio %}
-                                        <em>{{ user.profile.bio }}</em>
-                                    {% else %}
-                                     <em> No bio yet. </em>
-                                    {% endif %}
+                            <!-- ROLE -->
+                            <h6 class="mb-2">{{ profile_user.profile.role }}</h6>
+
+                            <!-- EMAIL -->
+                            <p>
+                                <a href="mailto:{{ profile_user.email }}">Email</a>
+                            </p>
+
+                            <!-- BIO -->
+                            <div class="d-flex justify-content-center text-center mt-1 mb-3">
+                                <div class="px-3">
+                                    <p class="text-muted mb-0">
+                                        {% if profile_user.profile.bio %}
+                                            <em>{{ profile_user.profile.bio }}</em>
+                                        {% else %}
+                                            <em>No bio yet.</em>
+                                        {% endif %}
+                                    </p>
                                 </div>
-                        </div>
+                            </div>
 
-                        <div class = "row justify-content-center">
-                            {% if user.profile.sustainability_interests.all %}
-                                <ul>
-                                    {% for interest in user.profile.sustainability_interests.all %}
-                                        <span class="badge bg-success me-1 ce">{{ interest.name }}</span>
+                            <!-- SUSTAINABILITY INTERESTS -->
+                            <div>
+                                {% if profile_user.profile.sustainability_interests.all %}
+                                    {% for interest in profile_user.profile.sustainability_interests.all %}
+                                        <span class="badge bg-success me-1">{{ interest.name }}</span>
                                     {% endfor %}
-                                </ul>
-                            {% else %}
-                                <em> No sustainability interests chosen.</em>
-                            {% endif %}
-                        </div>
+                                {% else %}
+                                    <em>No sustainability interests chosen.</em>
+                                {% endif %}
+                            </div>
 
-                        <div class = "row justify-content-center">
-                            {% if user.profile.trading_interests.all %}
-                                <ul>
-                                    {% for interest in user.profile.trading_interests.all %}
+                            <!-- TRADING INTERESTS -->
+                            <div class="mt-2">
+                                {% if profile_user.profile.trading_interests.all %}
+                                    {% for interest in profile_user.profile.trading_interests.all %}
                                         <span class="badge bg-info me-1">{{ interest.name }}</span>
                                     {% endfor %}
-                                </ul>
-                            {% else %}
-                                <em> No trading interests chosen.</em>
-                            {% endif %}
-                        </div>
-
-                        <!-- Number of trades -->
-                        <div class="d-flex justify-content-center text-center mt-3 mb-2">
-                            <div class="px-3">
-                                <p class="mb-2 h5">0</p>
-                                <p class="text-muted mb-0">Trades</p>
+                                {% else %}
+                                    <em>No trading interests chosen.</em>
+                                {% endif %}
                             </div>
-                        </div>
+
+                            <!-- MESSAGE BUTTON -->
+                            <a href="{% url 'inbox' %}" class="btn btn-primary btn-rounded btn-lg mt-3">
+                                Messages
+                            </a>
+
+                            <!-- TRADES (you can update count later) -->
+                            <div class="d-flex justify-content-center text-center mt-3 mb-2">
+                                <div class="px-3">
+                                    <p class="mb-2 h5">0</p>
+                                    <p class="text-muted mb-0">Trades</p>
+                                </div>
+                            </div>
+
+                            <!-- MODERATOR DELETE BUTTON -->
+                            {% if request.user.is_staff and request.user != profile_user %}
+                            <a href="{% url 'delete_profile' profile_id=profile_user.profile.id %}"
+                               class="btn btn-danger mt-3"
+                               onclick="return confirm('Are you sure you want to delete this user?');">
+                                Delete User (Moderator)
+                            </a>
+                            {% endif %}
+
                         </div>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
     </div>
@@ -213,4 +212,8 @@
         </div>
     </div>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
 </html>

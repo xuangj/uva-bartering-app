@@ -14,8 +14,97 @@
 <body>
     <!-- NAV BAR -->
     {% include '_navbar.html'%}
+
+    <div class="container py-4">
+        <h1>Welcome moderator!</h1>
+    </div>
+    <!--Search for specific username or role-->
+    <div class="container py-3">
+        <h5>Search for users here</h5>
+
+        <form class="row g-3" method="get">
+            <div class="col-md-4">
+                <label for="name" class="form-label">Name</label>
+                <input type="text"
+                    name="name"
+                    id="name"
+                    class="form-control"
+                    placeholder="Search by name" />
+            </div>
+            <div class="col-md-2">
+                <label for="role" class="form-label">Role</label>
+                <select name="role" id="role" class="form-select">
+                    <option value="">All</option>
+                    <option value="Undergraduate Student">Undergraduate Student</option>
+                    <option value="Graduate Student">Graduate Student</option>
+                    <option value="Faculty">Faculty</option>
+                    <option value="Other">Other</option>
+
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"></label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <!--Profile display, allows for deleting profiles/users-->
+    <div class="container py-4">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for profile in profiles %}
+                {% if not profile.user == request.user %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5><a href="{% url 'user_profile' username=profile.user.username %}" class="card-title">{{ profile.user.username }}</a></h5>
+                                <p><strong>{{ profile.role }}</strong></p>
+                                <p class="card-text">{{ profile.bio|truncatechars:120 }}</p>
+                            </div>
+                            <div class="card-footer text-muted d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="{% url 'start_chat' profile.user.id %}" class="btn btn-md btn-primary">
+                                        <i class="bi bi-chat-dots"></i> Message
+                                    </a>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ profile.id }}">
+                                    <i class="bi bi-trash"></i>Delete User
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="confirmDeleteModal{{ profile.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirm Delete</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    Are you sure you want to delete this user?
+                                    <br><strong>This action can't be undone.</strong>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <a href="{% url 'delete_profile' profile.id %}" id="confirmDeleteBtn" class="btn btn-danger">
+                                        Delete User
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
     
-    <p> moderator dashboard (empty right now)</p>
+    
+
     <!-- Bootstrap JS bundle (for dropdown functionality) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
