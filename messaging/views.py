@@ -183,8 +183,9 @@ def chat(request: HttpRequest, thread_id: int) -> HttpResponse:
     # Mark unread messages as read
     from messaging.models import MessageRead
 
-    unread_messages = messages_qs.exclude(sender=request.user).exclude(
-        reads__user=request.user
+    unread_messages = messages_qs.filter(
+        ~Q(sender=request.user) &
+        ~Q(reads__user=request.user)
     )
 
     MessageRead.objects.bulk_create(
