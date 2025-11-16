@@ -40,6 +40,24 @@
                         </div>
                         {% endif %}
 
+                        <!-- only allow staff to ban users -->
+                        {% if request.user.is_staff and request.user != user %}
+                        <div class="mt-1 mb-1 text-start position-relative">
+                            {% if user.is_active %}
+                            <!-- Unban button -->
+                            <a href="{% url 'toggle_ban_user' user.username %}" class="btn btn-danger">
+                                <i class="bi bi-slash-circle me-1"></i> Ban User
+                            </a>
+                            {% else %}
+                            <!-- Ban button -->
+                            <a href="{% url 'toggle_ban_user' user.username %}" class="btn btn-success">
+                                <i class="bi bi-unlock me-1"></i> Unban User
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+
 
                         <!-- edit profile pop-up modal -->
                         <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModal" aria-hidden="true">

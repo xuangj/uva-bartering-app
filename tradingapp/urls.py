@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 
-from core.views import home, login_redirect_view, moderator_dashboard, post_create, user_profile, edit_profile, my_trades, view_post, make_trade_offer, view_trade, accept_trade, deny_trade, delete_trade_offer, report_post, change_pfp
+from core.views import home, login_redirect_view, moderator_dashboard, post_create, user_profile, edit_profile, my_trades, view_post, make_trade_offer, view_trade, accept_trade, deny_trade, delete_trade_offer, report_post, change_pfp, toggle_ban_user
 from messaging.views import chat, get_or_create_dm_thread, inbox, start_chat, groupchat_create, groupchat_select_users
 
 urlpatterns = [
@@ -39,6 +39,8 @@ urlpatterns = [
     path("trade/<int:post_id>/make-offer/", make_trade_offer, name="make_trade_offer"),
 
     path("user/<str:username>/edit/pfp", change_pfp, name="change_pfp"),
+    path("user/<str:username>/ban", toggle_ban_user, name="toggle_ban_user"),
+
 
 ]
 

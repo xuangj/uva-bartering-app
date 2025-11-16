@@ -17,6 +17,7 @@
   <body class="bg-light">
     <!-- Navbar -->
     {% include '_navbar.html'%}
+
     
     <main class="container py-4">
       <!-- Admin Banner -->
@@ -33,6 +34,7 @@
                   aria-label="Close"></button>
         </div>
       {% endif %}
+
       <h3 class="mb-4">Search Listings</h3>
       <!-- Search Form -->
       <form class="row g-3" method="get">
@@ -186,8 +188,14 @@
               {% endif %}
 
                 <div class="card-footer text-muted">
-                  Posted by <strong>{{ post.poster.username }}</strong>
-                  <br />
+                  Posted by 
+                  <strong>
+                      <a href="{% url 'user_profile' username=post.poster.username %}" 
+                      class="text-decoration-none text-dark">
+                          {{ post.poster.username }}
+                      </a>
+                  </strong>
+                  <br>
                   {{ post.created_at|date:"M d, Y" }}
                 </div>
               </div>
@@ -197,6 +205,7 @@
       {% else %}
         <div class="alert alert-info mt-4">No posts available yet.</div>
       {% endif %}
+
     </main>
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

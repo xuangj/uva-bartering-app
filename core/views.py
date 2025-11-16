@@ -403,6 +403,7 @@ def delete_trade_offer(request, trade_id):
     return redirect("my_trades")
 
 
+# MAKE TRADE OFFER
 @login_required
 def make_trade_offer(request, post_id):
     requested_post = get_object_or_404(Post, id=post_id)
@@ -499,3 +500,17 @@ def change_pfp(request, username):
 
     # Render the template
     return render(request, "pfp_change_form.html", {"form": form})
+
+
+@login_required
+def toggle_ban_user(request, username):
+    user = request.user
+    if user.is_staff:
+        # Get the profile of the user being banned/unbanned
+        viewed_user = get_object_or_404(User, username=username)
+
+        # toggle ban
+        viewed_user.is_active = not viewed_user.is_active
+        viewed_user.save()
+
+    return render(request, 'profile.html', {'user': viewed_user})

@@ -189,3 +189,4 @@ SOCIALACCOUNT_PROVIDERS = {
         "OAUTH_PKCE_ENABLED": False,
     }
 }
+
