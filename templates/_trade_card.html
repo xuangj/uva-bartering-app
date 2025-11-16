@@ -1,5 +1,5 @@
 <div class="col">
-    <div class="card h-100 shadow-sm border-0">
+    <div class="card h-100 shadow-sm border-primary border-2">
         <div class="card-body">
             <h5 class="card-title">
                 <!--Link card to individual Trade page-->
@@ -41,7 +41,7 @@
                     </a>
                 <!--Rescind trade offer (non-OP action)-->
                 {% else %}
-                    <a href="{% url 'delete_trade_offer' trade.id %}" class="btn btn-sm btn-dark btn-outline-danger"
+                    <a href="{% url 'delete_trade_offer' trade.id %}" class="btn btn-sm btn-outline-danger"
                         onclick="return confirm('Do you want to take back this trade offer?');">
                         <i class="bi bi-trash"></i> Rescind
                     </a>

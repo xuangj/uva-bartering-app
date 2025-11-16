@@ -39,6 +39,9 @@
         <div class="row g-4">
 
             <!-- LEFT COLUMN: Post Display -->
+                {% if not post.is_available %}
+                    <div class="alert alert-secondary mt-3">This item has already been traded.</div>
+                {% endif %}
             <div class="col-lg-6">
                 {% if post.image %}
                     <img src="{{ post.image.url }}" class="post-hero-img mb-3" alt="{{ post.title }}">
