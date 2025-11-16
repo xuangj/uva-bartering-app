@@ -48,9 +48,9 @@ class PfpForm(forms.ModelForm):
         fields = ["pfp"]
 
 class TradeForm(forms.ModelForm):
-    offered_posts = forms.ModelMultipleChoiceField(
+    offered_posts = forms.ModelChoiceField(
         queryset=Post.objects.none(),
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.Select(attrs={"class":"form-select"}),  # standard dropdown
         required=True,
         help_text="Select one or more of your posts to offer."
     )

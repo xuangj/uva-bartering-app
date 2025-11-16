@@ -1,0 +1,123 @@
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Post</title>
+
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        .preview-img {
+            display: none;
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: .5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    {% include '_navbar.html' %}
+
+    <div class="container py-4">
+
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+
+                        <h2 class="fw-bold mb-3">Send a Trade Offer</h2>
+                        <p class="text-muted mb-4">You found something you want - now let's trade for it!</p>
+
+                        <!-- ERROR DISPLAY -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Please correct the errors below:</strong>
+                                {{ form.errors }}
+                            </div>
+                        {% endif %}
+ 
+
+                        <div class="card mb-3 p-3 shadow-sm text-center">
+                            <img src="{{ requested_post.image.url }}" class="img-fluid d-block mx-auto" style="width: 300px; height: auto;">
+                            <div>
+                                <strong>Item:</strong> {{ requested_post.title }}
+                            </div>
+
+                            <p class="text-muted mb-1">Posted by 
+                                <strong>{{ requested_post.poster.username }}</strong>
+                                <br>
+                                {{ requested_post.created_at|date:"M d, Y" }}
+                                <br>
+                            </p>
+                            <ul class="list-group">
+                                <li class="list-group-item"><strong>Description: </strong>{{ requested_post.description }}</li>
+                                <li class="list-group-item"><strong>Category:</strong> {{ requested_post.category }}</li>
+                                <li class="list-group-item"><strong>Size:</strong> {{ requested_post.general_size }}</li>
+                                <li class="list-group-item"><strong>Weight:</strong> {{ requested_post.weight }}</li>
+                                {% if requested_post.clothing_size %}
+                                    <li class="list-group-item">
+                                        <strong>Clothing size:</strong> {{ requested_post.clothing_size }}
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                    
+
+                        <!-- FORM -->
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <!-- ITEMS TO OFFER -->
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Offer an Item</strong></label>
+                                {{ form.offered_posts|add_class:"form-select" }}
+                            </div>  
+
+                        <!-- SUBMIT TRADE OFFER -->
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="bi bi-send"></i> Send Trade Offer
+                        </button>                            
+                        </form>
+
+                        <!-- BACK -->
+                        <div class="text-center mt-3">
+                            <a href="{% url 'home' %}" class="text-decoration-none">
+                                <i class="bi bi-arrow-left"></i> Back to Home
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- IMAGE PREVIEW SCRIPT -->
+    <script>
+        const fileInput = document.getElementById("id_image");
+        const preview = document.getElementById("preview");
+
+        fileInput.addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = "block";
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
