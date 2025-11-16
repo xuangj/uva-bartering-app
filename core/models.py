@@ -115,6 +115,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_available = models.BooleanField(default=True)
 
+
     def clean(self):
         super().clean()
         if self.category == 'Clothing' and not self.clothing_size:
