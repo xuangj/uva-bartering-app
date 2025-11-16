@@ -18,6 +18,7 @@ urlpatterns = [
     path("post/<int:post_id>/delete/", views.delete_post_mod, name="moderator_delete_post"),
     path("user/<int:user_id>/ban/", views.ban_user, name="moderator_ban_user"),
     path("user/<int:user_id>/unban/", views.unban_user, name="moderator_unban_user"),
+    path("post/<int:post_id>/delete/", views.delete_post, name="delete_post"),
 
     # Reports
     path("report/<int:report_id>/resolve/", views.resolve_report, name="moderator_resolve_report"),

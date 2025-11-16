@@ -57,6 +57,7 @@ class Profile(models.Model):
     pfp = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
     banned = models.BooleanField(default=False)
     banned_at = models.DateTimeField(null=True, blank=True)
+    has_logged_in_before = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username

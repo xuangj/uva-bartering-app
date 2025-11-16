@@ -305,3 +305,15 @@ def banned_users_table(request):
     return render(request, "moderator/banned_users.html", {
         "banned_users": banned_users
     })
+
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if post.poster != request.user:
+        messages.error(request, "You do not have permission to delete this post.")
+        return redirect("home")
+
+    post.delete()
+    messages.success(request, "Post deleted successfully.")
+    return redirect("user_profile", username=request.user.username)
