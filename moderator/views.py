@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from core.models import Profile, Post, Report, Trade
 from messaging.models import Message
@@ -58,8 +59,8 @@ def dashboard(request):
 @login_required
 @staff_required
 def users_table(request):
-    profiles = Profile.objects.select_related("user").all()
-    return render(request, "moderator/users_table.html", {"profiles": profiles})
+    users = User.objects.select_related("profile").all()
+    return render(request, "moderator/users_table.html", {"users": users})
 
 
 # ---------------------------------------------------------------------
@@ -228,3 +229,62 @@ def dismiss_report(request, report_id):
 
     messages.warning(request, "Report dismissed.")
     return redirect("moderator_reports_table")
+
+# Ban a user
+@login_required
+@staff_required
+def ban_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    profile = user.profile
+
+    if profile.banned:
+        messages.warning(request, "User is already banned.")
+        return redirect("moderator_users_table")
+
+    # Mark banned
+    profile.banned = True
+    profile.banned_at = timezone.now()
+    profile.save()
+
+    # DELETE posts
+    Post.objects.filter(poster=user).delete()
+
+    # DELETE trades (remove ALL trades involving banned user)
+    Trade.objects.filter(offerer=user).delete()
+    Trade.objects.filter(receiver=user).delete()
+
+    # Mark messages
+    Message.objects.filter(sender=user).update(
+        content="[Message sent by banned user]"
+    )
+
+    messages.success(request, f"{user.username} has been banned.")
+    return redirect("moderator_users_table")
+
+# Unban a user
+@login_required
+@staff_required
+def unban_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    profile = user.profile
+
+    if not profile.banned:
+        messages.warning(request, "User is not banned.")
+        return redirect("moderator_users_table")
+
+    profile.banned = False
+    profile.banned_at = None
+    profile.save()
+
+    messages.success(request, f"{user.username} has been unbanned.")
+    return redirect("moderator_users_table")
+
+# Banned users table view
+@login_required
+@staff_required
+def banned_users_table(request):
+    banned_users = Profile.objects.filter(banned=True).select_related("user")
+
+    return render(request, "moderator/banned_users.html", {
+        "banned_users": banned_users
+    })

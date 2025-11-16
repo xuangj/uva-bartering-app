@@ -20,7 +20,7 @@
                 <td>{{ u.username }}</td>
                 <td>{{ u.profile.role }}</td>
                 <td>
-                    {% if u.profile.is_banned %}
+                    {% if u.profile.banned %}
                         <span class="badge bg-danger">Banned</span>
                     {% else %}
                         <span class="badge bg-success">Active</span>
@@ -31,9 +31,11 @@
                         View
                     </a>
 
-                    <a href="{% url 'moderator_toggle_ban' u.id %}" class="btn btn-sm btn-warning">
-                        {% if u.profile.is_banned %} Unban {% else %} Ban {% endif %}
-                    </a>
+                    {% if u.profile.banned %}
+                    <a href="{% url 'moderator_unban_user' u.id %}" class="btn btn-sm btn-warning">Unban</a>
+                    {% else %}
+                    <a href="{% url 'moderator_ban_user' u.id %}" class="btn btn-sm btn-warning">Ban</a>
+                    {% endif %}
 
                     <a href="{% url 'moderator_delete_user' u.profile.id %}"
                        class="btn btn-sm btn-danger">

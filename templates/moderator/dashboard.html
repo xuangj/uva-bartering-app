@@ -6,6 +6,8 @@
     <h1 class="mb-4">Moderator Dashboard</h1>
 
     <div class="row g-4">
+
+        <!-- USERS -->
         <div class="col-md-4">
             <a href="{% url 'moderator_users_table' %}" class="text-decoration-none">
                 <div class="card shadow-sm h-100">
@@ -17,6 +19,7 @@
             </a>
         </div>
 
+        <!-- POSTS -->
         <div class="col-md-4">
             <a href="{% url 'moderator_posts_table' %}" class="text-decoration-none">
                 <div class="card shadow-sm h-100">
@@ -28,6 +31,7 @@
             </a>
         </div>
 
+        <!-- REPORTS -->
         <div class="col-md-4">
             <a href="{% url 'moderator_reports_table' %}" class="text-decoration-none">
                 <div class="card shadow-sm h-100">
@@ -39,6 +43,7 @@
             </a>
         </div>
 
+        <!-- MESSAGES -->
         <div class="col-md-4">
             <a href="{% url 'moderator_messages_table' %}" class="text-decoration-none">
                 <div class="card shadow-sm h-100 mt-4">
@@ -50,12 +55,25 @@
             </a>
         </div>
 
+        <!-- TRADES -->
         <div class="col-md-4">
             <a href="{% url 'moderator_trades_table' %}" class="text-decoration-none">
                 <div class="card shadow-sm h-100 mt-4">
                     <div class="card-body">
                         <h4 class="card-title"><i class="bi bi-arrow-left-right"></i> Trades</h4>
                         <p class="text-muted">Monitor trades and resolve disputes.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- BANNED USERS (NEW) -->
+        <div class="col-md-4">
+            <a href="{% url 'moderator_banned_users' %}" class="text-decoration-none">
+                <div class="card shadow-sm h-100 mt-4">
+                    <div class="card-body">
+                        <h4 class="card-title"><i class="bi bi-slash-circle"></i> Banned Users</h4>
+                        <p class="text-muted">View and manage all banned accounts.</p>
                     </div>
                 </div>
             </a>

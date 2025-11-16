@@ -42,6 +42,7 @@ urlpatterns = [
     path("user/<str:username>/edit/pfp", change_pfp, name="change_pfp"),
     path("user/<int:profile_id>/delete/", delete_profile, name="delete_profile"),
     path("delete-account/", delete_account, name="account_delete"),
+    path("banned/", TemplateView.as_view(template_name="banned.html"), name="banned_page"),
 
     path("trades/active/", my_trades, name="my_trades"),
     path("trades/<int:trade_id>/accept/", accept_trade, name="accept_trade"),

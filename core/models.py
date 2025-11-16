@@ -54,6 +54,8 @@ class Profile(models.Model):
     sustainability_interests = models.ManyToManyField(SustainabilityInterests, blank=True)
     trading_interests = models.ManyToManyField(TradingInterests, blank=True)
     pfp = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
+    banned = models.BooleanField(default=False)
+    banned_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.user.username
