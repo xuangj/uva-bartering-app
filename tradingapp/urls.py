@@ -30,6 +30,8 @@ urlpatterns = [
     path("post/<int:post_id>/", view_post, name="view_post"),
     path("post/<int:post_id>/edit/", edit_post, name="edit_post"),
     path("report/<int:post_id>/", report_post, name='report_post'),
+    path("post/<int:post_id>/delete/", delete_post, name="delete_post"),
+
 
     path("inbox/", inbox, name="inbox"),
     path("chat/<int:thread_id>/", chat, name="chat"),
