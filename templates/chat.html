@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chat</title>
@@ -9,161 +9,236 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        .chat-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .chat-avatar {
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: #e0e0e0;
-        }
-        .participant-names {
-            font-size: 1rem;
-            color: #555;
-            font-weight: 500;
-        }
+    .chat-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    }
 
-        .messages-box {
-            overflow-y: auto;
-            max-height: 70vh;
-            padding: 1rem 0;
-            margin-bottom: 1rem;
-        }
+    .message-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+    }
 
-        .message {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 0.75rem;
-        }
+    .messages-box {
+    height: 65vh;         /* adjustable: use % of screen height */
+    overflow-y: auto;
+    padding-right: 4px;
+    }
 
-        .message-text {
-            display: inline-block;
-            max-width: 75%;
-            border-radius: 1rem;
-            padding: 0.5rem 1rem;
-            margin: 0;
-            word-wrap: break-word;
-        }
+    .message-bundle {
+    display: flex;
+    flex-direction: column;
+    max-width: 70%;
+    }
 
-        .sent .message-text {
-            background-color: var(--bs-blue);
-            color: white;
-            align-self: flex-end;
-        }
+    .nickname {
+    font-weight: 600;
+    margin-bottom: 3px;
+    }
 
-        .received .message-text {
-            background-color: var(--bs-gray-200);
-            color: black;
-            align-self: flex-start;
-        }
+    .message-group.sent .nickname,
+    .message-group.sent .timestamp {
+    text-align: right;
+    }
 
-        .timestamp {
-            font-size: 0.75rem;
-            margin-top: 2px;
-            color: #888;
-        }
+    .message-group.received .nickname,
+    .message-group.received .timestamp {
+    text-align: left;
+    }
 
-        .sent .timestamp {
-            align-self: flex-end;
-        }
+    .message-group.sent {
+    flex-direction: row-reverse;
+    }
 
-        .message-input {
-            position: sticky;
-            bottom: 0;
-            padding: 1rem 0;
-        }
+    .message-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    }
 
-        .message-text.system-message {
-            background-color: var(--bs-warning-bg-subtle);
-            color: var(--bs-warning-text-emphasis);
-            border: 1px solid var(--bs-warning-border-subtle);
-            text-align: center;
-            border-radius: 0.5rem;
-            padding: 0.5rem;
-            font-style: italic;
-        }
+    .nickname {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+    }
+
+    .bubble {
+    background: #eee;
+    padding: 8px 14px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    }
+
+    .sent .bubble {
+    background: var(--bs-blue);
+    color: white;
+    margin-left: auto;
+    }
+
+    .timestamp {
+    font-size: 0.75rem;
+    color: #777;
+    margin-top: 3px;
+    }
+    .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-direction: row;
+    }
     </style>
-</head>
+  </head>
 
-<body class="bg-light">
-{% include '_navbar.html' %}
+  <body class="bg-light">
+    {% include '_navbar.html' %}
 
-<div class="container py-4">
+    <div class="container py-4">
 
-    <!-- Header -->
-    <div class="chat-header">
-        <img src="https://api.dicebear.com/7.x/identicon/svg?seed=thread{{ thread.id }}" class="chat-avatar">
+      <!-- HEADER -->
+      <div class="chat-header">
+
+        {% comment %} Determine correct avatar seed {% endcomment %}
+        <!-- HEADER AVATAR -->
+        {% if thread.thread_type == "dm" %}
+        {% for u in thread.participants.all %}
+        {% if u != request.user %}
+        <img 
+          src="{% if u.profile.pfp %}{{ u.profile.pfp.url }}{% else %}https://api.dicebear.com/7.x/identicon/svg?seed={{ u.username }}{% endif %}"
+          class="chat-avatar">
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <!-- Group chat = thread icon -->
+        <img 
+          src="https://api.dicebear.com/7.x/identicon/svg?seed={{ thread.id }}"
+          class="chat-avatar">
+        {% endif %}
 
         <div>
-            <h2 class="m-0 fw-bold">
-                {% if thread.participants.count == 2 %}
-                    <!-- DM -->
-                    {% for u in thread.participants.all %}
-                        {% if u != request.user %}
-                            {{ u.username }}
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    <!-- Group chat -->
-                    Group Chat
-                {% endif %}
-            </h2>
+          <h2 class="m-0 fw-bold">
+            {% if thread.thread_type == "dm" %}
+            {% for u in thread.participants.all %}
+            {% if u != request.user %}
+            {% if u.profile.nickname %}
+            {{ u.profile.nickname }}
+            {% else %}
+            {{ u.username }}
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+            {% else %}
+            {{ thread.name|default:"Group Chat" }}
+            {% endif %}
+          </h2>
 
-            <!-- Show all participants except the viewer -->
-            <div class="participant-names">
-                {% for p in thread.participants.all %}
-                    {% if p != request.user %}
-                        {{ p.username }}{% if not forloop.last %}, {% endif %}
-                    {% endif %}
-                {% endfor %}
-            </div>
+          <!-- show all other participants -->
+          <div class="participant-names">
+            {% for p in thread.participants.all %}
+            {% if p != request.user %}
+            {% if p.profile.nickname %}
+            {{ p.profile.nickname }}
+            {% else %}
+            {{ p.username }}
+            {% endif %}
+            {% if not forloop.last %}, {% endif %}
+            {% endif %}
+            {% endfor %}
+          </div>
         </div>
-    </div>
+      </div>
 
 
-    <!-- MESSAGES -->
-    <div class="messages-box">
-        {% for msg in messages %}
-            <div class="message {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
-                
-                {% if msg.message_type == "trade" %}
-                    <p class="message-text system-message">🔄 {{ msg.content }}</p>
-                {% else %}
-                    <p class="message-text">
-                        {% if thread.participants.count > 2 and msg.sender != request.user %}
-                            <strong>{{ msg.sender.username }}:</strong>
-                        {% endif %}
-                        {{ msg.content }}
-                    </p>
-                {% endif %}
+      <!-- MESSAGES -->
+      <div class="messages-box" id="messages">
 
-                <span class="timestamp">{{ msg.created_at|date:"M d, Y H:i" }}</span>
+        {% for group in groups %}
+        {% with sender=group.0.sender %}
+        <div class="message-group {% if sender == request.user %}sent{% else %}received{% endif %}">
+
+          {% with seed=sender.username %}
+          <a href="{% url 'user_profile' sender.username %}">
+            <img 
+              src="{% if sender.profile.pfp %}{{ sender.profile.pfp.url }}{% else %}https://api.dicebear.com/7.x/identicon/svg?seed={{ sender.username }}{% endif %}"
+              class="message-avatar">
+            {% endwith %}
+          </a>
+
+          <div class="message-bundle">
+
+            <!-- Nickname on top -->
+            <div class="nickname">
+              {% if sender.profile.nickname %}
+              {{ sender.profile.nickname }}
+              {% else %}
+              {{ sender.username }}
+              {% endif %}
             </div>
+
+            <!-- All message bubbles -->
+            {% for msg in group %}
+            <div class="bubble">
+              {{ msg.content }}
+            </div>
+            {% endfor %}
+
+            <!-- Timestamp of last message -->
+            <div class="timestamp">
+              {% with last_msg=group|last %}
+              <div class="timestamp">
+                {{ last_msg.created_at|date:"M d, Y H:i" }}
+              </div>
+              {% endwith %}
+            </div>
+
+          </div>
+        </div>
+        {% endwith %}
         {% empty %}
-            <p class="text-muted">No messages yet. Start the conversation!</p>
+        <p class="text-muted">No messages yet.</p>
         {% endfor %}
-    </div>
+      </div>
 
 
-    <!-- INPUT -->
-    <form method="POST" class="message-input">
+      <!-- INPUT -->
+      <form method="POST" class="message-input">
         {% csrf_token %}
         <div class="input-group">
-            <input name="content"
-                   class="form-control"
-                   placeholder="Type your message..." required>
-            <button class="btn btn-primary px-4" type="submit">Send</button>
+          <input name="content"
+            class="form-control"
+            placeholder="Type your message..."
+            required>
+          <button class="btn btn-primary px-4" type="submit">Send</button>
         </div>
-    </form>
+      </form>
 
-</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+function scrollToBottom() {
+  const box = document.getElementById("messages");
+  box.scrollTop = box.scrollHeight;
+}
 
-</body>
+document.addEventListener("DOMContentLoaded", scrollToBottom);
+
+// Ensure scroll AFTER images load (avatars)
+window.addEventListener("load", scrollToBottom);
+
+// Auto-scroll after form is submitted
+document.querySelector("form.message-input").addEventListener("submit", () => {
+  setTimeout(scrollToBottom, 50);
+});
+    </script>
+
+  </body>
 </html>

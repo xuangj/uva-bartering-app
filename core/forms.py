@@ -14,31 +14,42 @@ class PostForm(forms.ModelForm):
         self.fields["image"].required = True
 
 class ProfileForm(forms.ModelForm):
-    username = forms.CharField(max_length=150, required=True) 
+    username = forms.CharField(max_length=150, required=False)
+
     class Meta:
         model = Profile
-        fields = ["username", "role", "bio", "sustainability_interests", "trading_interests"]
+        fields = [
+            "nickname",
+            "bio",
+            "role",
+            "sustainability_interests",
+            "trading_interests",
+        ]
         widgets = {
-            "bio": forms.Textarea(attrs={'placeholder': 'Tell us about yourself...',"rows": 3,}),
+            "bio": forms.Textarea(attrs={'placeholder': 'Tell us about yourself...', "rows": 3}),
             "sustainability_interests": forms.CheckboxSelectMultiple(),
             "trading_interests": forms.CheckboxSelectMultiple(),
         }
 
-    # pre-fill username in edit profile modal
     def __init__(self, *args, **kwargs):
         profile = kwargs.get("instance")
         super().__init__(*args, **kwargs)
         if profile:
-            self.fields['username'].initial = profile.user.username
+            self.fields["username"].initial = profile.user.username
 
-    # update username throughout database if user edits it
     def save(self, commit=True):
         profile = super().save(commit=False)
-        profile.user.username = self.cleaned_data['username']  # save username to User model
-        profile.user.save()
+
+        # Only update username if a non-empty value was provided
+        username = self.cleaned_data.get("username")
+        if username:
+            profile.user.username = username
+            profile.user.save()
+
         if commit:
             profile.save()
             self.save_m2m()
+
         return profile
 
 

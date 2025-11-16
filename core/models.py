@@ -49,6 +49,7 @@ class Profile(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    nickname = models.CharField(max_length=30, blank=True)
     bio = models.TextField(blank=True, max_length=100)
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='undergrad')
     sustainability_interests = models.ManyToManyField(SustainabilityInterests, blank=True)

@@ -35,7 +35,7 @@ def groupchat_create(request):
         return redirect("groupchat_select_users")
 
     # Create the thread
-    thread = ChatThread.objects.create()
+    thread = ChatThread.objects.create(thread_type="group")
     thread.participants.add(request.user)
     thread.participants.add(*selected_ids)
 
@@ -131,14 +131,36 @@ def chat(request: HttpRequest, thread_id: int) -> HttpResponse:
             )
             return redirect("chat", thread_id=thread.id)
 
-    messages = thread.messages.all().select_related("sender", "related_trade")
+    messages_qs = thread.messages.all().select_related("sender", "related_trade")
+
+    # Group messages by consecutive sender
+    grouped = []
+    current_group = []
+
+    prev_sender_id = None
+
+    for msg in messages_qs:
+        if prev_sender_id != msg.sender_id:
+            # start new group
+            if current_group:
+                grouped.append(current_group)
+            current_group = [msg]
+        else:
+            # same sender → same group
+            current_group.append(msg)
+
+        prev_sender_id = msg.sender_id
+
+    # append last group
+    if current_group:
+        grouped.append(current_group)
 
     return render(
         request,
         "chat.html",
         {
             "thread": thread,
-            "messages": messages,
+            "groups": grouped,
             "participants": thread.participants.all(),
         },
     )
