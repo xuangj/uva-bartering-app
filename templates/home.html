@@ -250,56 +250,98 @@
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-      document.addEventListener("DOMContentLoaded", function () {
-          // Django embeds authenticated user ID (none if not logged in)
-          const USER_ID = "{{ user.id|default:'null' }}";
+document.addEventListener("DOMContentLoaded", function () {
+    const USER_ID = "{{ user.id|default:'null' }}";
+    if (USER_ID === "null") return; // stop if logged out
 
-          // If not authenticated, don’t run the tutorial
-          if (USER_ID === "null") {
-              return;
-          }
+    const TOUR_KEY = `tour_homepage_steps_user_${USER_ID}`;
 
-          // Unique completion key for THIS user only
-          const TOUR_KEY = `tour_complete_user_${USER_ID}`;
+    // Track which step the user is on
+    let step = parseInt(localStorage.getItem(TOUR_KEY) || "0");
 
-          // If user has already completed the tour, stop
-          if (localStorage.getItem(TOUR_KEY) === "true") {
-              return;
-          }
+    // Elements needed
+    const dropdownToggle = document.querySelector("#navbarDropdown");
+    const profileBtn = document.querySelector("#profile-btn"); 
+    // ^ make sure your Profile link has id="profile-btn"
 
-          // Try to find the profile button in the navbar
-          const profileBtn = document.querySelector("#profile-btn");
+    if (!dropdownToggle || !profileBtn) return;
 
-          if (!profileBtn) {
-              console.warn("Profile button not found for tutorial.");
-              return;
-          }
+    // Utility to create/remove bubbles
+    function createBubble(text, elem) {
+            removeBubble();
 
-          // Highlight it in a friendly way
-          profileBtn.style.boxShadow = "0 0 15px 4px rgba(0, 123, 255, 0.7)";
-          profileBtn.style.transition = "0.3s";
+            const rect = elem.getBoundingClientRect();
+            const bubble = document.createElement("div");
 
-          // Show a tooltip-style message
-          const bubble = document.createElement("div");
-          bubble.innerText = "Click here to view your profile!";
-          bubble.style.position = "absolute";
-          bubble.style.top = "50px";
-          bubble.style.right = "10px";
-          bubble.style.background = "white";
-          bubble.style.padding = "10px 15px";
-          bubble.style.border = "1px solid #ccc";
-          bubble.style.borderRadius = "8px";
-          bubble.style.boxShadow = "0 3px 10px rgba(0,0,0,0.15)";
-          bubble.style.zIndex = 9999 ;
+            // Offsets to reposition the bubble
+            const OFFSET_X = -40;   // move bubble left
+            const OFFSET_Y = 40;    // move bubble down
 
-          document.body.appendChild(bubble);
+            bubble.id = "tour-bubble";
+            bubble.innerText = text;
+            bubble.style.position = "absolute";
 
-          // When the profile button is clicked, mark as complete
-          profileBtn.addEventListener("click", () => {
-              localStorage.setItem(TOUR_KEY, "true");
-          });
-      });
-      </script>
+            bubble.style.top = (rect.top + window.scrollY + OFFSET_Y) + "px";
+            bubble.style.left = (rect.left + window.scrollX + OFFSET_X) + "px";
+
+            bubble.style.background = "white";
+            bubble.style.padding = "10px 15px";
+            bubble.style.border = "1px solid #ccc";
+            bubble.style.borderRadius = "8px";
+            bubble.style.boxShadow = "0 3px 10px rgba(0,0,0,0.15)";
+            bubble.style.zIndex = "99999";
+
+            document.body.appendChild(bubble);
+        }
+
+
+    function removeBubble() {
+        const b = document.querySelector("#tour-bubble");
+        if (b) b.remove();
+    }
+
+    function highlight(elem) {
+        elem.style.boxShadow = "0 0 15px 4px rgba(0, 123, 255, 0.7)";
+        elem.style.transition = "0.3s";
+    }
+
+    function clearHighlight(elem) {
+        elem.style.boxShadow = "";
+    }
+
+    // --- STEP 1: Highlight dropdown ---
+    if (step === 0) {
+        highlight(dropdownToggle);
+        createBubble("Click here to open your account menu", dropdownToggle);
+
+        dropdownToggle.addEventListener("click", () => {
+            clearHighlight(dropdownToggle);
+            removeBubble();
+
+            localStorage.setItem(TOUR_KEY, "1");
+            step = 1;
+            runStep2();
+        }, { once: true });
+    }
+
+    // --- STEP 2: Highlight Profile button ---
+    function runStep2() {
+        highlight(profileBtn);
+        createBubble("Click here to view your profile", profileBtn);
+
+        profileBtn.addEventListener("click", () => {
+            clearHighlight(profileBtn);
+            removeBubble();
+            localStorage.setItem(TOUR_KEY, "2"); // completed
+        }, { once: true });
+    }
+
+    if (step === 1) {
+        runStep2();
+    }
+});
+</script>
+
 
   </body>
 </html>
