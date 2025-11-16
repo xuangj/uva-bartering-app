@@ -5,33 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>UVA Trading App</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        />
     <link 
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-      rel="stylesheet"
-    />  
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        rel="stylesheet"
+        />  
+    <style>
+.post-link {
+  color: black !important;
+  text-decoration: none;
+}
+
+.post-link:hover {
+  color: black !important; /* keeps color on hover */
+  text-decoration: underline !important;
+}
+    </style>
   </head>
   <body class="bg-light">
     <!-- Navbar -->
     {% include '_navbar.html'%}
-    
+
     <main class="container py-4">
       <!-- Admin Banner -->
       {% if user.is_authenticated and user.is_superuser %}
-        <div class="alert alert-primary alert-dismissible fade show d-flex justify-content-between align-items-center"
-             role="alert">
-          <div>
-            You are logged in as an <strong>admin user</strong>.
-            <a href="{% url 'moderator_dashboard' %}" class="">Go to admin dashboard</a>
-          </div>
-          <button type="button"
-                  class="btn-close"
-                  data-bs-dismiss="alert"
-                  aria-label="Close"></button>
+      <div class="alert alert-primary alert-dismissible fade show d-flex justify-content-between align-items-center"
+           role="alert">
+        <div>
+          You are logged in as an <strong>admin user</strong>.
+          <a href="{% url 'moderator_dashboard' %}" class="">Go to admin dashboard</a>
         </div>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"></button>
+      </div>
       {% endif %}
       <h3 class="mb-4">Search Listings</h3>
       <!-- Search Form -->
@@ -49,9 +60,9 @@
           <select name="category" id="category" class="form-select">
             <option value="" {% if not request.GET.category %}selected{% endif %}>All</option>
             {% for choice_value, choice_label in categories %}
-              <option value="{{ choice_value }}"{% if request.GET.category == choice_value %}selected{% endif %}>
-                  {{ choice_label }}
-              </option>
+            <option value="{{ choice_value }}"{% if request.GET.category == choice_value %}selected{% endif %}>
+            {{ choice_label }}
+            </option>
             {% endfor %}
           </select>
         </div>
@@ -73,9 +84,9 @@
           <select name="general_size" id="general_size" class="form-select">
             <option value="" {% if not request.GET.general_size %}selected{% endif %}>All</option>
             {% for size_value, size_label in general_sizes %}
-              <option value="{{ size_value }}"{% if request.GET.general_size == size_value %}selected{% endif %}>
-                  {{ size_label }}
-              </option>
+            <option value="{{ size_value }}"{% if request.GET.general_size == size_value %}selected{% endif %}>
+            {{ size_label }}
+            </option>
             {% endfor %}
           </select>
         </div>
@@ -84,124 +95,156 @@
           <select name="weight" id="weight" class="form-select">
             <option value="" {% if not request.GET.weight %}selected{% endif %}>All</option>
             {% for weight_value, weight_label in weights %}
-              <option value="{{ weight_value }}"{% if request.GET.weight == weight_value %}selected{% endif %}>
-                  {{ weight_label }}
-              </option>
+            <option value="{{ weight_value }}"{% if request.GET.weight == weight_value %}selected{% endif %}>
+            {{ weight_label }}
+            </option>
             {% endfor %}
           </select>
         </div>
-          <div class="col-md-2">
+        <div class="col-md-2">
           <label for="sort_by" class="form-label">Sort By</label>
           <select name="sort_by" id="sort_by" class="form-select">
-            
+
             <option value="" {% if not request.GET.sort_by %}selected{% endif %}>Newest (Default)</option>
             <option value="oldest" {% if request.GET.sort_by == 'oldest' %}selected{% endif %}>Oldest</option>
-            
+
             <option value="price_asc" {% if request.GET.sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
             <option value="price_desc" {% if request.GET.sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
-            
+
             <option value="title_asc" {% if request.GET.sort_by == 'title_asc' %}selected{% endif %}>Title (A-Z)</option>
             <option value="title_desc" {% if request.GET.sort_by == 'title_desc' %}selected{% endif %}>Title (Z-A)</option>
-            
+
           </select>
         </div>
         <div class="col-md-2 d-flex align-items-end gap-2">
-            <!-- Search Button -->
-            <button type="submit" class="btn btn-primary">Search</button>
+          <!-- Search Button -->
+          <button type="submit" class="btn btn-primary">Search</button>
 
-            <!-- New Post Button -->
-            {% if user.is_authenticated %}
-            <a href="{% url 'post_create' %}" class="btn btn-success">
-              <i class="bi bi-plus-lg"></i> New Post</a>
-            {% endif %}
+          <!-- New Post Button -->
+          {% if user.is_authenticated %}
+          <a href="{% url 'post_create' %}" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> New Post</a>
+          {% endif %}
 
         </div>
       </form>
       <hr class="my-4" />
       {% if posts %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-          {% for post in posts %}
-          <!--Post format-->
-            <div class="col">
-              <div class="card h-100 shadow-sm">
-                {% if post.image %}
-                  <img src="{{ post.image.url }}"
-                       class="card-img-top"
-                       alt="{{ post.title }}"
-                       style="object-fit: cover;
-                              height: 200px" />
-                {% endif %}
-                <div class="card-body">
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for post in posts %}
+        <div class="col">
+          <div class="card shadow-sm">
 
-                  <!-- THIS IS IDEAL BUT DOSEN'T WORK ON A CERTAIN MERGE -> MAKE THIS WORK -->
-                  <!-- <a href="{% url 'view_post' post_id=post.id %}" class="card-title">{{ post.title }}</a> -->
-                  <!-- <p class="card-text">{{ post.description|truncatechars:120 }}</p> -->
+            {% if post.image %}
+            <a href="{% url 'view_post' post_id=post.id %}">
+              <img src="{{ post.image.url }}"
+                   class="card-img-top"
+                   alt="{{ post.title }}"
+                   style="object-fit: cover; height: 200px" />
+            </a>
+            {% endif %}
 
-                  <!-- THIS WORKS WITH REPORTS -->
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h5 class="card-title">{{ post.title }}</h5><div class="dropdown">
-                    <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.2rem;">
-                      <i class="bi bi-three-dots-vertical"></i> </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                        <li><a class="dropdown-item text-danger" 
-                              href="{% url 'report_post' post_id=post.id %}">
-                              <i class="bi bi-flag me-2"></i>Report Post</a>
-                            {% if post.poster == request.user %}
-                              <a class="dropdown-item"
-                              href="{% url 'edit_post' post_id=post.id %}">
-                              <i class="bi bi-pencil me-2"></i>Edit Post</a>
-                            {% endif %}
-                        </li>
-                        
-                    </ul>
-                  </div>
-                  </div>
-                  <div class="d-flex flex-wrap gap-2 mb-2">
-                      <span class="badge bg-primary">Category: {{ post.category }}</span>
-                      <span class="badge bg-success">Price: ${{ post.price }}</span>
-                  </div>
-                  <p class="mb-1">
-                      <small class="text-muted me-3">
-                          Size: <strong>{{ post.general_size }}</strong>
-                      </small>
-                      <small class="text-muted">
-                          Weight: <strong>{{ post.weight }}</strong>
-                      </small>
-                  </p>
-                  {% if post.clothing_size %}
-                      <p class="mb-1">
-                          <small class="text-muted">
-                              Clothing Size: <strong>{{ post.clothing_size}}</strong>
-                          </small>
-                      </p>
-                  {% endif %}
-                  <p class="card-text mt-3">{{ post.description|truncatechars:120 }}</p>
-                </div>
+            <div class="card-body">
 
-                <!-- CONDITIONAL MAKE TRADE OFFER BUTTON -->
-              {% if request.user.is_authenticated and request.user != post.poster %}
-                {% if post.user_has_pending_trade %}
-                  <button class="btn btn-warning w-100" disabled>
-                      <i class="bi bi-ban me-1"></i> Offer Already Sent
-                  </button>
-                {% else %}
-                  <a href="{% url 'make_trade_offer' post.id %}" class="btn btn-success">
-                      <i class="bi bi-arrow-left-right me-1"></i> Make Offer
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <!-- Clickable title -->
+                <h5 class="card-title">
+                  <a href="{% url 'view_post' post_id=post.id %}" 
+                     class="post-link">
+                    {{ post.title }}
                   </a>
-                {% endif %}
-              {% endif %}
+                </h5>
 
-                <div class="card-footer text-muted">
-                  Posted by <strong>{{ post.poster.username }}</strong>
-                  <br />
-                  {{ post.created_at|date:"M d, Y" }}
+                <!-- Dropdown -->
+                <div class="dropdown mb-2 text-end">
+                  <button class="btn btn-sm" type="button" data-bs-toggle="dropdown"
+                                                           style="font-size: 1.2rem;">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a class="dropdown-item text-danger"
+                         href="{% url 'report_post' post_id=post.id %}">
+                        <i class="bi bi-flag me-2"></i>Report Post
+                      </a>
+                    </li>
+                    {% if post.poster == request.user %}
+                    <li>
+                      <a class="dropdown-item"
+                         href="{% url 'edit_post' post_id=post.id %}">
+                        <i class="bi bi-pencil me-2"></i>Edit Post
+                      </a>
+                    </li>
+                    {% endif %}
+                  </ul>
                 </div>
               </div>
+
+              <!-- Badges -->
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <span class="badge bg-primary">Category: {{ post.category }}</span>
+                <span class="badge bg-success">Price: ${{ post.price }}</span>
+              </div>
+
+              <!-- Details -->
+              <p class="mb-1">
+              <small class="text-muted me-3">
+                Size: <strong>{{ post.general_size }}</strong>
+              </small>
+              <small class="text-muted">
+                Weight: <strong>{{ post.weight }}</strong>
+              </small>
+              </p>
+
+              {% if post.clothing_size %}
+              <p class="mb-1">
+              <small class="text-muted">
+                Clothing Size: <strong>{{ post.clothing_size }}</strong>
+              </small>
+              </p>
+              {% endif %}
+
+              <p class="card-text mt-3">
+              {{ post.description|truncatechars:120 }}
+              </p>
             </div>
-          {% endfor %}
+
+            <!-- TRADE BUTTON AREA -->
+            {% if request.user.is_authenticated and request.user != post.poster %}
+
+            {% if post.user_has_pending_trade %}
+            <!-- Link to existing pending trade -->
+            <a href="{% url 'view_trade' trade_id=post.pending_trade_id %}"
+               class="btn btn-warning m-4 mt-0">
+              <i class="bi bi-hourglass-split me-1"></i> View Pending Trade
+            </a>
+
+            {% else %}
+            <!-- Create new trade -->
+            <a href="{% url 'make_trade_offer' post.id %}" 
+               class="btn btn-success m-4 mt-0">
+              <i class="bi bi-arrow-left-right me-1"></i> Make Offer
+            </a>
+            {% endif %}
+
+            {% endif %}
+
+            <div class="card-footer text-muted">
+              Posted by  
+              <a href="{% url 'user_profile' username=post.poster.username %}"
+                 class="fw-bold text-decoration-none">
+                {{ post.poster.username }}
+              </a>
+              <br />
+              {{ post.created_at|date:"M d, Y" }}
+            </div>
+
+          </div>
         </div>
+        {% endfor %}
+      </div>
       {% else %}
-        <div class="alert alert-info mt-4">No posts available yet.</div>
+      <div class="alert alert-info mt-4">No posts available yet.</div>
       {% endif %}
     </main>
     <!-- Bootstrap JS Bundle -->

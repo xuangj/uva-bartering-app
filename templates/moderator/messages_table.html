@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Message Review</h2>
+
+    <table class="table table-striped table-hover shadow-sm align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Sender</th>
+                <th>Recipient</th>
+                <th>Content</th>
+                <th>Sent At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in messages %}
+            <tr>
+                <td>{{ m.sender.username }}</td>
+                <td>{{ m.recipient.username }}</td>
+                <td>{{ m.content|truncatechars:80 }}</td>
+                <td>{{ m.timestamp|date:"M d, Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted py-4">No messages found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

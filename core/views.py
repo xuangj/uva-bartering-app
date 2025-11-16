@@ -9,6 +9,7 @@ from django.db.models import Q, Exists, OuterRef
 
 from .forms import PostForm, ProfileForm, ReportForm, TradeForm, PfpForm
 from .models import Post, Profile, Report, Trade
+from messaging.models import Message
 
 from messaging.views import get_or_create_dm_thread
 from messaging.utils import (
@@ -20,6 +21,9 @@ from messaging.utils import (
 
 
 # Homepage
+from django.db.models import Exists, OuterRef, Subquery
+from core.models import Post, Trade
+
 
 def home(request):
     posts = Post.objects.filter(is_available=True).order_by("-created_at")
@@ -47,40 +51,49 @@ def home(request):
         posts = posts.filter(price__lte=price_max)
 
     # Sorting
-    if sort_by == 'oldest':
-        posts = posts.order_by('created_at')
-    elif sort_by == 'price_asc':
-        posts = posts.order_by('price')
-    elif sort_by == 'price_desc':
-        posts = posts.order_by('-price')
-    elif sort_by == 'title_asc':
-        posts = posts.order_by('title')
-    elif sort_by == 'title_desc':
-        posts = posts.order_by('-title')
+    if sort_by == "oldest":
+        posts = posts.order_by("created_at")
+    elif sort_by == "price_asc":
+        posts = posts.order_by("price")
+    elif sort_by == "price_desc":
+        posts = posts.order_by("-price")
+    elif sort_by == "title_asc":
+        posts = posts.order_by("title")
+    elif sort_by == "title_desc":
+        posts = posts.order_by("-title")
     else:
-        posts = posts.order_by('-created_at')
+        posts = posts.order_by("-created_at")
 
-    # Pending trade flag
+    # Pending trade detection
     if request.user.is_authenticated:
-        pending_trades = Trade.objects.filter(
-            offerer=request.user,
-            item_requested=OuterRef('pk'),
-            status='Pending'
-        )
-        posts = posts.annotate(user_has_pending_trade=Exists(pending_trades))
 
+        # Subquery that finds a pending trade the user made for this post
+        pending_trade_qs = Trade.objects.filter(
+            offerer=request.user,     # user who made the offer
+            item_requested=OuterRef("pk"),
+            status="Pending"
+        )
+
+        # Annotate each post with boolean flag
+        posts = posts.annotate(
+            user_has_pending_trade=Exists(pending_trade_qs),
+            pending_trade_id=Subquery(
+                pending_trade_qs.values("id")[:1]
+            )
+        )
+
+    # Context
     context = {
-        'posts': posts,
-        'categories': Post.CATEGORY,
-        'general_sizes': Post.GENERAL_SIZES,
-        'weights': Post.WEIGHT_CATEGORIES,
+        "posts": posts,
+        "categories": Post.CATEGORY,
+        "general_sizes": Post.GENERAL_SIZES,
+        "weights": Post.WEIGHT_CATEGORIES,
     }
 
     return render(request, "home.html", context)
 
 
 # Login redirect
-
 @login_required
 def login_redirect_view(request):
     if request.user.is_staff:
@@ -89,7 +102,6 @@ def login_redirect_view(request):
 
 
 # Moderator Dashboard
-
 @login_required
 def moderator_dashboard(request):
     if not request.user.is_staff:
@@ -109,7 +121,6 @@ def moderator_dashboard(request):
 
 
 # View Profile
-
 @login_required
 def user_profile(request, username):
     profile_user = get_object_or_404(User, username=username)
@@ -129,7 +140,6 @@ def user_profile(request, username):
 
 
 # Edit Profile
-
 @login_required
 def edit_profile(request, username):
     if username != request.user.username:
@@ -152,8 +162,7 @@ def edit_profile(request, username):
     })
 
 
-# Moderator Delete User
-
+# Delete User
 @login_required
 def delete_profile(request, profile_id):
     if not request.user.is_staff:

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Reports</h2>
+
+    <table class="table table-bordered table-hover shadow-sm align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Status</th>
+                <th>Reporter</th>
+                <th>Reported User</th>
+                <th>Post</th>
+                <th>Reason</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for r in reports %}
+            <tr class="
+                {% if r.resolution %}
+                    {% if r.resolution.status == 'resolved' %}table-success
+                    {% else %}table-warning{% endif %}
+                {% endif %}
+            ">
+                <!-- STATUS -->
+                <td class="fw-bold">
+                    {% if r.resolution %}
+                        {% if r.resolution.status == "resolved" %}
+                            <span class="text-success">Resolved</span>
+                        {% else %}
+                            <span class="text-warning">Dismissed</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-danger">Unresolved</span>
+                    {% endif %}
+                </td>
+
+                <!-- REPORTER -->
+                <td>
+                    <a href="{% url 'user_profile' r.reporter.username %}">
+                        {{ r.reporter.username }}
+                    </a>
+                </td>
+
+                <!-- REPORTED USER -->
+                <td>
+                    <a href="{% url 'user_profile' r.reported_user.username %}">
+                        {{ r.reported_user.username }}
+                    </a>
+                </td>
+
+                <!-- POST -->
+                <td>
+                    <a href="{% url 'view_post' r.reported_post.id %}">
+                        {{ r.reported_post.title }}
+                    </a>
+                </td>
+
+                <!-- REASON -->
+                <td>{{ r.comments|truncatechars:100 }}</td>
+
+                <!-- DATE -->
+                <td>{{ r.created_at|date:"M d, Y H:i" }}</td>
+
+                <!-- ACTIONS -->
+                <td>
+                    {% if not r.resolution %}
+                        <a href="{% url 'moderator_resolve_report' r.id %}"
+                           class="btn btn-sm btn-success">
+                           Resolve
+                        </a>
+                        <a href="{% url 'moderator_dismiss_report' r.id %}"
+                           class="btn btn-sm btn-warning">
+                           Dismiss
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Closed</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted py-4">
+                    No reports found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

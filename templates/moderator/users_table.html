@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">User Management</h2>
+
+    <table class="table table-striped table-hover align-middle shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Banned?</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.profile.role }}</td>
+                <td>
+                    {% if u.profile.is_banned %}
+                        <span class="badge bg-danger">Banned</span>
+                    {% else %}
+                        <span class="badge bg-success">Active</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'user_profile' u.username %}" class="btn btn-sm btn-outline-primary">
+                        View
+                    </a>
+
+                    <a href="{% url 'moderator_toggle_ban' u.id %}" class="btn btn-sm btn-warning">
+                        {% if u.profile.is_banned %} Unban {% else %} Ban {% endif %}
+                    </a>
+
+                    <a href="{% url 'moderator_delete_user' u.profile.id %}"
+                       class="btn btn-sm btn-danger">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted py-4">No users found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
