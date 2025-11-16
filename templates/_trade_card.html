@@ -3,11 +3,12 @@
         <div class="card-body">
             <h5 class="card-title">
                 <!--Link card to individual Trade page-->
-                {% if trade.userOne == request.user %} 
-                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered to <strong>{{ trade.receiver.username }}</strong></a>
+                {% if trade.offerer == request.user %} 
+                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offer to <strong>{{ trade.receiver.username }}</strong></a>
                 {% else %}
-                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered from <strong>{{ trade.offerer.username }}</strong></a>
+                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offer from <strong>{{ trade.offerer.username }}</strong></a>
                 {% endif %}
+            </h5>
             </h5>
 
             <p class="card-text mb-2">
