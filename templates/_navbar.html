@@ -20,7 +20,15 @@
                     {% endif %}
                   </a>
                 </li>
-                <li><a class="dropdown-item" href="{% url 'my_trades' %}">My Trades</a></li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'my_trades' %}">
+                      <i class="bi bi-list-ul"></i>
+                      My Trades
+                      {% if pending_trades_count > 0 %}
+                        <span class="badge bg-primary">{{ pending_trades_count }}</span>
+                      {% endif %}
+                    </a>
+                </li>
                 {% if user.is_authenticated and user.is_staff %}
                   <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Mod dashboard</a></li>
                 {% endif %}
@@ -38,3 +46,5 @@
         </div>
       </div>
     </nav>
+
+
