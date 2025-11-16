@@ -191,10 +191,11 @@
             {% endfor %}
 
             <!-- Timestamp of last message -->
+             {% load tz %}
             <div class="timestamp">
               {% with last_msg=group|last %}
               <div class="timestamp">
-                {{ last_msg.created_at|date:"M d, Y H:i" }}
+                {{ last_msg.created_at|timezone:"America/New_York"|date:"M d, Y H:i" }}
               </div>
               {% endwith %}
             </div>
