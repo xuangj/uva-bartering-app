@@ -15,9 +15,12 @@
                 <li>
                   <a class="dropdown-item" href="{% url 'inbox' %}">
                     Inbox
-                    {% if user.unread_messages %}
-                    <span class="badge bg-danger">{{ user.unread_messages }}</span>
-                    {% endif %}
+                    {% if unread_message_count > 0 %}
+                        <span class="badge bg-danger rounded-pill ms-1" 
+                              id="unread-message-count">
+                            {{ unread_message_count }}
+                        </span>
+                        {% endif %}
                   </a>
                 </li>
                 <li><a class="dropdown-item" href="{% url 'my_trades' %}">My Trades</a></li>
@@ -25,7 +28,7 @@
                   <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Mod dashboard</a></li>
                 {% endif %}
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a></li>
+                <li><a class="dropdown-item" id="profile-btn" href="{% url 'user_profile' username=user.username %}">Profile</a></li>
                 <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a>
                 </li>
               </ul>

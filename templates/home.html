@@ -249,5 +249,57 @@
     </main>
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          // Django embeds authenticated user ID (none if not logged in)
+          const USER_ID = "{{ user.id|default:'null' }}";
+
+          // If not authenticated, don’t run the tutorial
+          if (USER_ID === "null") {
+              return;
+          }
+
+          // Unique completion key for THIS user only
+          const TOUR_KEY = `tour_complete_user_${USER_ID}`;
+
+          // If user has already completed the tour, stop
+          if (localStorage.getItem(TOUR_KEY) === "true") {
+              return;
+          }
+
+          // Try to find the profile button in the navbar
+          const profileBtn = document.querySelector("#profile-btn");
+
+          if (!profileBtn) {
+              console.warn("Profile button not found for tutorial.");
+              return;
+          }
+
+          // Highlight it in a friendly way
+          profileBtn.style.boxShadow = "0 0 15px 4px rgba(0, 123, 255, 0.7)";
+          profileBtn.style.transition = "0.3s";
+
+          // Show a tooltip-style message
+          const bubble = document.createElement("div");
+          bubble.innerText = "Click here to view your profile!";
+          bubble.style.position = "absolute";
+          bubble.style.top = "50px";
+          bubble.style.right = "10px";
+          bubble.style.background = "white";
+          bubble.style.padding = "10px 15px";
+          bubble.style.border = "1px solid #ccc";
+          bubble.style.borderRadius = "8px";
+          bubble.style.boxShadow = "0 3px 10px rgba(0,0,0,0.15)";
+          bubble.style.zIndex = 9999 ;
+
+          document.body.appendChild(bubble);
+
+          // When the profile button is clicked, mark as complete
+          profileBtn.addEventListener("click", () => {
+              localStorage.setItem(TOUR_KEY, "true");
+          });
+      });
+      </script>
+
   </body>
 </html>
