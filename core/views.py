@@ -61,6 +61,8 @@ def home(request):
         posts = posts.order_by("title")
     elif sort_by == "title_desc":
         posts = posts.order_by("-title")
+    elif sort_by == "available_date_asc":
+        posts = posts.order_by("available_date")
     else:
         posts = posts.order_by("-created_at")
 

@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>{% if is_edit %}Edit Your Post{% else %}Create a New Post{% endif %}</title>
 
     <!-- BOOTSTRAP -->
@@ -92,6 +93,14 @@
                             <div class="mb-3">
                                 <label class="form-label">Price (optional)</label>
                                 {{ form.price|add_class:"form-control" }}
+                            </div>
+
+                    
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ form.available_date.id_for_label }}">
+                                    Available Date (Optional)
+                                </label>
+                                {{ form.available_date|add_class:"form-control" }}
                             </div>
 
                             <!-- REQUIRED IMAGE -->

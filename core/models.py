@@ -112,6 +112,7 @@ class Post(models.Model):
     clothing_size = models.CharField(max_length=5, choices=CLOTHING_SIZES, blank=True, null=True,verbose_name='Clothing Size')
     price = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    available_date = models.DateField(null=True, blank=True,)
     is_available = models.BooleanField(default=True)
 
     def clean(self):

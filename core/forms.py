@@ -7,7 +7,11 @@ from .models import Post, Profile, Trade, Report
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "description", "category", "general_size", "weight", "clothing_size", "price", "image"]
+        widgets = {
+            'available_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            # ... include any other existing widgets you have ...
+        }
+        fields = ["title", "description", "category", "general_size", "weight", "clothing_size", "price", "image","available_date"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

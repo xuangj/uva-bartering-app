@@ -114,6 +114,8 @@
             <option value="title_asc" {% if request.GET.sort_by == 'title_asc' %}selected{% endif %}>Title (A-Z)</option>
             <option value="title_desc" {% if request.GET.sort_by == 'title_desc' %}selected{% endif %}>Title (Z-A)</option>
 
+            <option value="available_date_asc" {% if request.GET.sort_by == 'available_date_asc' %}selected{% endif %}>Available Date</option>
+
           </select>
         </div>
         <div class="col-md-2 d-flex align-items-end gap-2">
