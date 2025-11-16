@@ -27,7 +27,8 @@ from core.models import Post, Trade
 
 def home(request):
     posts = Post.objects.filter(is_available=True).order_by("-created_at")
-
+    if not request.user.is_authenticated:
+        posts = posts.filter(is_private=False)
     # Filters
     category_filter = request.GET.get("category")
     name_search = request.GET.get("name")

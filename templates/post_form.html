@@ -93,6 +93,26 @@
                                 <label class="form-label">Price (optional)</label>
                                 {{ form.price|add_class:"form-control" }}
                             </div>
+                            <!-- PRIVATE LISTING -->
+                            <div class="mb-3">
+                                 <!-- Use a simple label for the section -->
+                                <label class="form-label d-block">Post Visibility</label> 
+                                
+                                <div class="form-check">
+                                    <!-- Render the checkbox input directly -->
+                                    {{ form.is_private }}
+                                    
+                                    <!-- Link the label to the input ID -->
+                                    <label class="form-check-label" for="{{ form.is_private.id_for_label }}">
+                                        Make Post Private
+                                    </label>
+                                    
+                                    <!-- Display the help text -->
+                                    <div class="form-text text-muted">
+                                        If checked, this post will only be visible to logged-in users on the homepage.
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- REQUIRED IMAGE -->
                             <div class="mb-3">

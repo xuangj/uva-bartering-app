@@ -7,7 +7,7 @@ from .models import Post, Profile, Trade, Report
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "description", "category", "general_size", "weight", "clothing_size", "price", "image"]
+        fields = ["title", "description", "category", "general_size", "weight", "clothing_size", "price", "image","is_private"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
