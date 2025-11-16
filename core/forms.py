@@ -66,6 +66,15 @@ class TradeForm(forms.ModelForm):
         help_text="Select one or more of your posts to offer."
     )
 
+    comment = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            "class": "form-control",
+            "rows": 3,
+            "placeholder": "Add an optional message about your offer..."
+        })
+    )
+
     class Meta:
         model = Trade
         fields = ['offered_posts', 'comment']

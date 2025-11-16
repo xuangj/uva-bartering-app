@@ -70,51 +70,62 @@ def inbox(request):
     user = request.user
     search_query = (request.GET.get("search") or "").strip()
 
-    # -------------------------------------------------------
-    # A. SHOW ALL CONVERSATIONS (DM + GROUPCHAT)
-    # -------------------------------------------------------
+    # Conversations (DMs + Groupchats)
     conversations = (
         ChatThread.objects
         .filter(participants=user)
         .annotate(
             last_msg_at=Max("messages__created_at"),
-            unread_count=Count(
-                "messages",
-                filter=~Q(messages__sender=user) &
-                       ~Q(messages__reads__user=user),
-                distinct=True
-            )
+
+            # ❌ REMOVE old unread_count logic
+            # unread_count=Count(
+            #     "messages",
+            #     filter=(
+            #         ~Q(messages__sender=user) &
+            #         ~Q(messages__reads__user=user)
+            #     ),
+            #     distinct=True,
+            # ),
         )
         .order_by("-last_msg_at")
-        .prefetch_related("participants", "messages")
+        .prefetch_related("participants")
         .distinct()
     )
 
-    # Search within conversations: match ANY participant's username/nickname
+    # Search conversations
     if search_query:
         conversations = conversations.filter(
             Q(participants__username__icontains=search_query) |
             Q(participants__profile__nickname__icontains=search_query)
         ).distinct()
 
-    # -------------------------------------------------------
-    # B. "OTHER USERS": Users without an existing DM
-    # -------------------------------------------------------
+    # Correct counts
+    unread_qs = (
+        Message.objects
+        .filter(thread__in=conversations)
+        .exclude(sender=user)
+        .exclude(reads__user=user)
+        .values("thread_id")
+        .annotate(count=Count("id"))
+    )
+    unread_map = {row["thread_id"]: row["count"] for row in unread_qs}
 
-    # Get DM threads (only dm type)
+    # Attach unread_count to each thread
+    for t in conversations:
+        t.unread_count = unread_map.get(t.id, 0)
+
+    # Find users WITHOUT a DM thread with the current user
     dm_threads = ChatThread.objects.filter(
         participants=user,
         thread_type="dm"
     )
 
-    # Users in DMs with the current user
     dm_partner_ids = (
         User.objects.filter(chat_threads__in=dm_threads)
         .exclude(id=user.id)
         .values_list("id", flat=True)
     )
 
-    # Other users = not in dm list, matching search
     other_users = None
     if search_query:
         other_users = (
@@ -123,19 +134,21 @@ def inbox(request):
                 Q(profile__nickname__icontains=search_query)
             )
             .exclude(id=user.id)
-            .exclude(id__in=dm_partner_ids)        # ← IMPORTANT: GC doesn't matter
+            .exclude(id__in=dm_partner_ids)
             .order_by("username")
         )
 
-    return render(
-        request,
-        "message_inbox.html",
-        {
-            "threads": conversations,
-            "other_users": other_users,
-            "search_query": search_query,
-        },
-    )
+    return render(request, "message_inbox.html", {
+        "threads": conversations,
+        "other_users": other_users,
+        "search_query": search_query,
+    })
+
+    return render(request, "message_inbox.html", {
+        "threads": conversations,
+        "other_users": other_users,
+        "search_query": search_query,
+    })
 
 # displays an ongoing chat thread btwn two users and handles sending new msgs
 @login_required

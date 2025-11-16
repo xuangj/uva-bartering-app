@@ -39,7 +39,13 @@
                             For: {{ trade.item_requested.title }}
                         </h4>
                         <p class="text-muted mb-1">
-                            Posted by <strong>{{ trade.receiver.username }}</strong>
+                        Posted by <strong>
+                          {% if trade.receiver.profile.nickname %}
+                          {{ trade.receiver.profile.nickname }}
+                          {% else %}
+                          {{ trade.receiver.username }}
+                          {% endif %}
+                        </strong>
                         </p>
                         <p>{{ trade.item_requested.description }}</p>
 
@@ -54,7 +60,13 @@
             <div class="col-md-7">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h4>Offered by {{ trade.offerer.username }}</h4>
+                        <h4>Offered by 
+                          {% if trade.offerer.profile.nickname %}
+                          {{ trade.offerer.profile.nickname }}
+                          {% else %}
+                          {{ trade.offerer.username }}
+                          {% endif %}
+</h4>
                         <p class="text-muted">{{ trade.comment|default:"No comment provided." }}</p>
 
                         {% if trade.offered_posts.all %}
@@ -92,11 +104,21 @@
             <!-- Message Button -->
             {% if user == trade.offerer %}
                 <a href="{% url 'start_chat' trade.receiver.id %}" class="btn btn-primary">
-                    <i class="bi bi-chat-dots"></i> Message {{ trade.receiver.username }}
+                    <i class="bi bi-chat-dots"></i> Message 
+                    {% if trade.receiver.profile.nickname %}
+                                    {{ trade.receiver.profile.nickname }}
+                                {% else %}
+                                    {{ trade.receiver.username }}
+                                {% endif %}
                 </a>
             {% else %}
                 <a href="{% url 'start_chat' trade.offerer.id %}" class="btn btn-primary">
-                    <i class="bi bi-chat-dots"></i> Message {{ trade.offerer.username }}
+                    <i class="bi bi-chat-dots"></i> Message 
+                    {% if trade.offerer.profile.nickname %}
+                                    {{ trade.offerer.profile.nickname }}
+                                {% else %}
+                                    {{ trade.offerer.username }}
+                                {% endif %}
                 </a>
             {% endif %}
 

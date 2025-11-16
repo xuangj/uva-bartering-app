@@ -1,6 +1,6 @@
 from messaging.models import Message, MessageRead
 from core.models import Trade, Report
-from django.db.models import Q
+from django.db.models import Q, Count
 
 def navbar_notifications(request):
     if not request.user.is_authenticated:
@@ -18,6 +18,10 @@ def navbar_notifications(request):
     # ACTIVE TRADES (pending only)
     active_trades = Trade.objects.filter(
         receiver=user,
+        status="Pending",
+    ).count()
+    active_trades += Trade.objects.filter(
+        offerer=user,
         status="Pending",
     ).count()
 
