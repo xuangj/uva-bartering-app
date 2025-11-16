@@ -445,6 +445,19 @@ def make_trade_offer(request, post_id):
 
         form = TradeForm(request.POST, user=request.user)
         if form.is_valid():
+            offered_post = form.cleaned_data['offered_posts']
+            duplicate_trade_exists = Trade.objects.filter(
+                offerer=request.user, 
+                item_requested=requested_post,
+                status='Pending',
+                offered_posts=offered_post # This efficiently checks the ManyToMany relationship
+            ).exists() 
+
+            if duplicate_trade_exists:
+                messages.error(request, 'You have already submitted this exact trade offer for this item. Please wait for the current offer to be processed.')
+                # Redirect back to the view_post page to display the error message
+                return redirect('view_post', post_id=requested_post.id) 
+
             trade = form.save(commit=False)
             trade.offerer = request.user
             trade.receiver = requested_post.poster
