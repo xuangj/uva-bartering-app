@@ -12,18 +12,22 @@
                 <th>Requested Item</th>
                 <th>Status</th>
                 <th>Created</th>
+                <th>Actions</th>
             </tr>
         </thead>
+
         <tbody>
             {% for t in trades %}
             <tr>
                 <td>{{ t.offerer.username }}</td>
                 <td>{{ t.receiver.username }}</td>
+
                 <td>
                     <a href="{% url 'view_post' t.item_requested.id %}">
                         {{ t.item_requested.title }}
                     </a>
                 </td>
+
                 <td>
                     {% if t.status == "Pending" %}
                         <span class="badge bg-warning text-dark">Pending</span>
@@ -33,14 +37,27 @@
                         <span class="badge bg-danger">Denied</span>
                     {% endif %}
                 </td>
+
                 <td>{{ t.created_at|date:"M d, Y" }}</td>
+
+                <td>
+                    <a href="{% url 'view_trade' t.id %}" 
+                       class="btn btn-sm btn-outline-primary">View</a>
+
+                    <a href="{% url 'delete_trade_offer' t.id %}"
+                       onclick="return confirm('Delete this trade?');"
+                       class="btn btn-sm btn-danger">Delete</a>
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5" class="text-center text-muted py-4">No trades found.</td>
+                <td colspan="6" class="text-center text-muted py-4">
+                    No trades found.
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
 </div>
 {% endblock %}

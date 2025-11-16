@@ -1,47 +1,87 @@
 <nav class="navbar navbar-expand-lg shadow-sm bg-white">
   <div class="container">
     <a class="navbar-brand" href="{% url 'home' %}">UVA Trading App</a>
+
     <div class="d-flex align-items-center">
-      <!-- Dropdown -->
+
       {% if user.is_authenticated %}
+
+      <!-- USER DROPDOWN -->
       <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton"
-                                                                              data-bs-toggle="dropdown" aria-expanded="false">
-          Hello, <strong>
+        <button class="btn btn-outline-primary dropdown-toggle d-flex align-items-center"
+                type="button"
+                id="dropdownMenuButton"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+
+          Hello,&nbsp;<strong>
             {% if user.profile.nickname %}
-            {{ user.profile.nickname|capfirst }}
+              {{ user.profile.nickname|capfirst }}
             {% else %}
-            {{ user.username|capfirst }}
+              {{ user.username|capfirst }}
             {% endif %}
           </strong>
-        </button>
-        <h4 class="mb-2">
 
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
-            <!-- <li><a class="dropdown-item" href="{% url 'inbox' %}">Inbox</a></li> -->
-            <li>
-              <a class="dropdown-item" href="{% url 'inbox' %}">
-                Inbox
-                {% if user.unread_messages %}
-                <span class="badge bg-danger">{{ user.unread_messages }}</span>
-                {% endif %}
-              </a>
-            </li>
-            <li><a class="dropdown-item" href="{% url 'my_trades' %}">My Trades</a></li>
-            {% if user.is_authenticated and user.is_staff %}
-            <li><a class="dropdown-item" href="{% url 'moderator_dashboard' %}">Mod dashboard</a></li>
-            {% endif %}
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a></li>
-            <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a>
-            </li>
-          </ul>
+          {% if notif_total %}
+            <span class="badge bg-primary ms-2">{{ notif_total }}</span>
+          {% endif %}
+        </button>
+
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+          <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+
+          <!-- INBOX -->
+          <li>
+            <a class="dropdown-item d-flex justify-content-between align-items-center"
+               href="{% url 'inbox' %}">
+              Inbox
+              {% if notif_unread_messages %}
+                <span class="badge bg-primary">{{ notif_unread_messages }}</span>
+              {% endif %}
+            </a>
+          </li>
+
+          <!-- TRADES -->
+          <li>
+            <a class="dropdown-item d-flex justify-content-between align-items-center"
+               href="{% url 'my_trades' %}">
+              My Trades
+              {% if notif_trades %}
+                <span class="badge bg-primary">{{ notif_trades }}</span>
+              {% endif %}
+            </a>
+          </li>
+
+          <!-- MOD -->
+          {% if user.is_staff %}
+          <li>
+            <a class="dropdown-item d-flex justify-content-between align-items-center"
+               href="{% url 'moderator_dashboard' %}">
+              Admin
+              {% if notif_reports %}
+                <span class="badge bg-danger">{{ notif_reports }}</span>
+              {% endif %}
+            </a>
+          </li>
+          {% endif %}
+
+          <li><hr class="dropdown-divider"></li>
+
+          <li><a class="dropdown-item" href="{% url 'user_profile' username=user.username %}">Profile</a></li>
+
+          <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
+
+        </ul>
       </div>
+
       {% else %}
-      <span class="me-3">You are not logged in</span>
-      <a href="{% url 'account_login' %}"
-         class="btn btn-outline-primary btn-sm">Login</a>
+
+      <!-- NOT LOGGED IN -->
+      <a href="{% url 'account_login' %}" class="btn btn-outline-primary btn-sm">
+        Login
+      </a>
+
       {% endif %}
     </div>
   </div>

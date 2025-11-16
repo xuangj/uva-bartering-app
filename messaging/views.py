@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.db.models import Max
+from django.db.models import Max, Count, Q
 from core.models import Trade
 from django.contrib import messages
 from .models import ChatThread, Message
@@ -64,41 +64,66 @@ def groupchat_select_users(request):
     }
     return render(request, "create_groupchat.html", context)
 
-# Inbox page
 @login_required
 def inbox(request):
+    from django.db.models import Max, Count, Q
     user = request.user
     search_query = (request.GET.get("search") or "").strip()
 
-    # Base threads: only show threads with at least one message
-    base_threads = (
+    # -------------------------------------------------------
+    # A. SHOW ALL CONVERSATIONS (DM + GROUPCHAT)
+    # -------------------------------------------------------
+    conversations = (
         ChatThread.objects
         .filter(participants=user)
-        .filter(messages__isnull=False)
-        .annotate(last_msg_at=Max("messages__created_at"))
+        .annotate(
+            last_msg_at=Max("messages__created_at"),
+            unread_count=Count(
+                "messages",
+                filter=~Q(messages__sender=user) &
+                       ~Q(messages__reads__user=user),
+                distinct=True
+            )
+        )
         .order_by("-last_msg_at")
         .prefetch_related("participants", "messages")
         .distinct()
     )
 
-    # Filter threads by search (search only usernames)
+    # Search within conversations: match ANY participant's username/nickname
     if search_query:
-        threads = base_threads.filter(participants__username__icontains=search_query)
-    else:
-        threads = base_threads
-
-    # Other users only shown when searching
-    other_users = None
-    if search_query:
-        # Users already in any shown thread
-        users_in_threads = User.objects.filter(
-            chat_threads__in=threads
+        conversations = conversations.filter(
+            Q(participants__username__icontains=search_query) |
+            Q(participants__profile__nickname__icontains=search_query)
         ).distinct()
 
+    # -------------------------------------------------------
+    # B. "OTHER USERS": Users without an existing DM
+    # -------------------------------------------------------
+
+    # Get DM threads (only dm type)
+    dm_threads = ChatThread.objects.filter(
+        participants=user,
+        thread_type="dm"
+    )
+
+    # Users in DMs with the current user
+    dm_partner_ids = (
+        User.objects.filter(chat_threads__in=dm_threads)
+        .exclude(id=user.id)
+        .values_list("id", flat=True)
+    )
+
+    # Other users = not in dm list, matching search
+    other_users = None
+    if search_query:
         other_users = (
-            User.objects.filter(username__icontains=search_query)
+            User.objects.filter(
+                Q(username__icontains=search_query) |
+                Q(profile__nickname__icontains=search_query)
+            )
             .exclude(id=user.id)
-            .exclude(id__in=users_in_threads)
+            .exclude(id__in=dm_partner_ids)        # ← IMPORTANT: GC doesn't matter
             .order_by("username")
         )
 
@@ -106,7 +131,7 @@ def inbox(request):
         request,
         "message_inbox.html",
         {
-            "threads": threads,
+            "threads": conversations,
             "other_users": other_users,
             "search_query": search_query,
         },
@@ -154,6 +179,21 @@ def chat(request: HttpRequest, thread_id: int) -> HttpResponse:
     # append last group
     if current_group:
         grouped.append(current_group)
+
+    # Mark unread messages as read
+    from messaging.models import MessageRead
+
+    unread_messages = messages_qs.exclude(sender=request.user).exclude(
+        reads__user=request.user
+    )
+
+    MessageRead.objects.bulk_create(
+        [
+            MessageRead(message=msg, user=request.user)
+            for msg in unread_messages
+        ],
+        ignore_conflicts=True  # prevents duplicates
+    )
 
     return render(
         request,

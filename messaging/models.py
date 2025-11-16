@@ -93,9 +93,26 @@ class Message(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["created_at", "id"]
 
     def __str__(self):
         return f"Message<{self.id}> ({self.message_type})"
+
+class MessageRead(models.Model):
+    message = models.ForeignKey(
+        Message,
+        on_delete=models.CASCADE,
+        related_name="reads",
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="read_messages",
+    )
+    read_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("message", "user")  # cannot mark same msg twice

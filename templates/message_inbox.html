@@ -65,54 +65,57 @@
         <a href="{% url 'chat' thread.id %}"
            class="list-group-item list-group-item-action conversation-card">
 
-          <div class="d-flex align-items-center">
+          <div class="d-flex align-items-center justify-content-between">
 
-            {# Determine avatar seed #}
-            {% if thread.thread_type == "dm" %}
-            {% for u in thread.participants.all %}
-            {% if u != request.user %}
-            <img 
-               src="{% if u.profile.pfp %}{{ u.profile.pfp.url }}{% else %}https://api.dicebear.com/7.x/identicon/svg?seed={{ u.username }}{% endif %}"
-               class="avatar me-3">
-            {% endif %}
-            {% endfor %}
-            {% else %}
-            <!-- GROUPCHAT AVATAR = DICEBEAR BASED ON THREAD ID -->
-            <img 
-               src="https://api.dicebear.com/7.x/identicon/svg?seed={{ thread.id }}"
-               class="avatar me-3">
-            {% endif %}
+            <!-- LEFT: Avatar + name + snippet -->
+            <div class="d-flex align-items-center">
+              {% if thread.thread_type == "dm" %}
+              {% for u in thread.participants.all %}
+              {% if u != request.user %}
+              <img 
+                 src="{% if u.profile.pfp %}{{ u.profile.pfp.url }}{% else %}https://api.dicebear.com/7.x/identicon/svg?seed={{ u.username }}{% endif %}"
+                 class="avatar me-3">
+              {% endif %}
+              {% endfor %}
+              {% else %}
+              <img 
+                 src="https://api.dicebear.com/7.x/identicon/svg?seed={{ thread.id }}"
+                 class="avatar me-3">
+              {% endif %}
 
-            <div>
-              <strong>
-                {% if thread.thread_type == "dm" %}
-                {% for u in thread.participants.all %}
-                {% if u != request.user %}
-                {% if u.profile.nickname %}
-                {{ u.profile.nickname }}
-                {% else %}
-                {{ u.username }}
-                {% endif %}
-                {% endif %}
-                {% endfor %}
-                {% else %}
-                {{ thread.name|default:"Group Chat" }}
-                ({{ thread.participants.count }} members)
-                {% endif %}
-              </strong>
-              <br>
-
-              <small class="text-muted">
-                {% if thread.latest_message %}
-                {{ thread.latest_message.content|truncatechars:40 }}
-                {% else %}
-                No messages yet
-                {% endif %}
-              </small>
+              <div>
+                <strong>
+                  {% if thread.thread_type == "dm" %}
+                  {% for u in thread.participants.all %}
+                  {% if u != request.user %}
+                  {% if u.profile.nickname %}
+                  {{ u.profile.nickname }}
+                  {% else %}
+                  {{ u.username }}
+                  {% endif %}
+                  {% endif %}
+                  {% endfor %}
+                  {% else %}
+                  {{ thread.name|default:"Group Chat" }} ({{ thread.participants.count }} members)
+                  {% endif %}
+                </strong>
+                <br>
+                <small class="text-muted">
+                  {% if thread.latest_message %}
+                  {{ thread.latest_message.content|truncatechars:40 }}
+                  {% else %}
+                  No messages yet
+                  {% endif %}
+                </small>
+              </div>
             </div>
 
-          </div>
+            <!-- RIGHT: Notification badge -->
+            {% if thread.unread_count %}
+            <span class="badge bg-primary ms-2">{{ thread.unread_count }}</span>
+            {% endif %}
 
+          </div>
         </a>
         {% endfor %}
 
