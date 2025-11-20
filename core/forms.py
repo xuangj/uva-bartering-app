@@ -71,7 +71,7 @@ class TradeForm(forms.ModelForm):
         widget=forms.Textarea(attrs={
             "class": "form-control",
             "rows": 3,
-            "placeholder": "Add an optional message about your offer..."
+            "placeholder": "Add an optional message about your offer... (300 characters max)"
         })
     )
 
@@ -96,5 +96,5 @@ class ReportForm(forms.ModelForm):
         # Only include the field the user needs to fill out
         fields = ['comments'] 
         widgets = {
-            'comments': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Please describe why you are reporting this post and user.'})
+            'comments': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Please describe why you are reporting this post and user. (500 characters max)'})
         }
