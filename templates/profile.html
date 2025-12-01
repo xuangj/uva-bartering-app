@@ -51,7 +51,13 @@
 
     <section class="vh-100">
       <div class="container p-8 h-100">
-        <div class="row d-flex justify-content-center align-items-center mt-4">
+        <div class="row d-flex justify-content-center align-items-center mt-4">           
+            {% if form.errors %}
+            <div class="alert alert-danger mt-3">
+              Please correct your profile information and try again.
+            </div>
+            {% endif %}
+
           <div class="col-md-12 col-xl-4">
 
             <div class="card p-4 pt-0" style="border-radius: 15px;">
@@ -186,6 +192,9 @@
                   </div>
                 </div>
 
+                <!-- ROLE -->
+                <h6 class="mb-2">{{ profile_user.profile.role }}</h6>
+
                 <!-- BIO -->
                 <div class="mt-1 mb-4">
                   <div class="px-3">
@@ -198,9 +207,6 @@
                     </p>
                   </div>
                 </div>
-
-                <!-- ROLE -->
-                <h6 class="mb-2">{{ profile_user.profile.role }}</h6>
                 
                 <!-- SUSTAINABILITY INTERESTS -->
                 <div>
