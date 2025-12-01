@@ -51,7 +51,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=30, blank=True)
     bio = models.TextField(blank=True, max_length=100)
-    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='undergrad')
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='Undergraduate Student')
     sustainability_interests = models.ManyToManyField(SustainabilityInterests, blank=True)
     trading_interests = models.ManyToManyField(TradingInterests, blank=True)
     pfp = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
