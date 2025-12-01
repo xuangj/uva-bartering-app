@@ -1,3 +1,5 @@
+{% load widget_tweaks %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,6 +16,33 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/pfp_hover.css' %}">
   </head>
+
+  <style>
+    .modal-body .form-control {
+      width: 100%;
+    }
+
+    .modal-body .form-label {
+      margin-bottom: .3rem;
+    }
+
+    .form-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .col-9 ul {
+      padding-left: 0;
+      list-style: none;
+      margin-bottom: 0;
+    }
+
+    .col-9 li {
+      margin-bottom: 4px;
+    }
+
+  </style>
 
   <body>
 
@@ -74,41 +103,66 @@
 
                         <!-- ALL fields must be inside modal-body -->
                         <div class="modal-body" style="text-align: left; padding-left: 2rem;">
-
-                          <div class="mb-3">
-                            <label class="form-label">Nickname</label><br>
-                            {{ form.nickname }}
+                          <div class="pe-3">
+                            {% if form.errors %}
+                            <div class="alert alert-danger mt-3">
+                              <strong>Please correct the errors below:</strong>
+                              {{ form.errors }}
+                            </div>
+                            {% endif %}
+                          </div>
+                
+                          <div class="row mb-3">
+                            <div class="col-2">
+                              <label class="form-label">Nickname</label>
+                            </div>
+                            <div class="col-10">
+                              {{ form.nickname|add_class:"form-control" }}
+                            </div>
+                            
 
                           </div>
 
-                          <div class="mb-3">
-                            <label class="form-label">Bio</label><br>
-                            {{ form.bio }}
+                          <div class="row mb-3">
+                            <div class="col-2">
+                              <label class="form-label">Bio</label>
+                            </div>
+                            <div class="col-10">
+                              {{ form.bio|add_class:"form-control" }}
+                            </div>
                           </div>
 
-                          <div class="mb-3">
-                            <label class="form-label">Role</label><br>
-                            {{ form.role }}
+                          <div class="row mb-3">
+                            <div class="col-2">
+                              <label class="form-label">Role</label>
+                            </div>
+                            <div class="col-10">
+                              {{ form.role|add_class:"form-control" }}
+                            </div>
                           </div>
 
-                          <div class="mb-3">
-                            <label class="form-label">Sustainability Interests</label><br>
-                            {{ form.sustainability_interests }}
+                          <div class="row mb-3">
+                            <div class="col-3">
+                              <label class="form-label">Sustainability Interests</label>
+                            </div>
+                            <div class="col-9">
+                              <div class="form-check">
+                                {{ form.sustainability_interests }}
+                              </div>
+                              
+                            </div>
                           </div>
 
-                          <div class="mb-3">
-                            <label class="form-label">Trading Interests</label><br>
-                            {{ form.trading_interests }}
+                          <div class="row mb-3">
+                            <div class="col-3">
+                              <label class="form-label">Trading Interests</label>
+                            </div>
+                            <div class="col-9">
+                              <div class="form-check">
+                                {{ form.trading_interests }}                       
+                              </div>
+                            </div>
                           </div>
-
-                          <!-- THIS actually shows your validation errors -->
-                          {% if form.errors %}
-                          <div class="alert alert-danger mt-3">
-                            <strong>Please correct the errors below:</strong>
-                            {{ form.errors }}
-                          </div>
-                          {% endif %}
-
                         </div> <!-- END modal-body -->
 
                         <div class="modal-footer justify-content-between">
@@ -233,7 +287,6 @@
 
           </div>
         </div>
-      </div>
       </div>
     </section>
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
