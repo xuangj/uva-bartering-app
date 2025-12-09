@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Debug
 #DEBUG = os.getenv("DEBUG", "False") == "True"
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 # ALLOWED_HOSTS = ['uva-trading-app-0d9da62a5177.herokuapp.com', 'localhost', '127.0.0.1']
