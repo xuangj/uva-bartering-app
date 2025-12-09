@@ -155,7 +155,7 @@ class Trade(models.Model):
         related_name="trades_offered_with"
     )
 
-    comment = models.TextField(blank=True)
+    comment = models.TextField(blank=True, max_length=300)
     created_at = models.DateTimeField(auto_now_add=True)
 
     status = models.CharField(
@@ -201,7 +201,7 @@ class Report(models.Model):
     )
     
     # The reason for the report
-    comments = models.TextField(verbose_name='Reason for Report')
+    comments = models.TextField(verbose_name='Reason for Report', max_length=500)
     
     created_at = models.DateTimeField(auto_now_add=True)
 
