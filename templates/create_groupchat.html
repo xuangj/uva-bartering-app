@@ -118,11 +118,18 @@
             {% for uid in selected_ids %}
                 <input type="hidden" name="selected" value="{{ uid }}">
             {% endfor %}
-            <button class="btn btn-success btn-lg">
+            <button class="btn btn-success">
                 Create Group Chat
             </button>
         </form>
     {% endif %}
+
+    <!-- BACK BUTTON -->
+    <a href="{% url 'inbox' %}"
+        class="btn btn-outline-secondary btn-sm">
+        Back
+    </a>
+
 
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
