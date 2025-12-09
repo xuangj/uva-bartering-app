@@ -1,24 +1,53 @@
 <div class="col">
-    <div class="card h-100 shadow-sm border-primary border-2">
-        <div class="card-body">
-            <h5 class="card-title">
-                <!--Link card to individual Trade page-->
-                {% if trade.userOne == request.user %} 
-                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered to <strong>{{ trade.receiver.username }}</strong></a>
-                {% else %}
-                    <a href="{% url 'view_trade' trade_id=trade.id %}">Offered from <strong>{{ trade.offerer.username }}</strong></a>
-                {% endif %}
-            </h5>
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">
+          {% if trade.offerer == request.user %}
+          {# You are the one who made the offer #}
+          {% with user=trade.receiver %}
+          <a href="{% url 'view_trade' trade_id=trade.id %}">
+            Offered to 
+            <strong>
+              {% if user.profile.nickname %}
+              {{ user.profile.nickname }}
+              {% else %}
+              {{ user.username }}
+              {% endif %}
+            </strong>
+          </a>
+          {% endwith %}
+          {% else %}
+          {# You are the receiver of the offer #}
+          {% with user=trade.offerer %}
+          <a href="{% url 'view_trade' trade_id=trade.id %}">
+            Offered from 
+            <strong>
+              {% if user.profile.nickname %}
+              {{ user.profile.nickname }}
+              {% else %}
+              {{ user.username }}
+              {% endif %}
+            </strong>
+          </a>
+          {% endwith %}
+          {% endif %}
+        </h5>
 
             <p class="card-text mb-2">
-                <strong>Item Offered:</strong>
-                    {% for post in trade.offered_posts.all %}
-                        {{ post.title }}<br>
-                    {% endfor %}          
-                <strong> Item Requested:</strong> {{ trade.item_requested }}
+            <strong>Offered:</strong>
+            {% for post in trade.offered_posts.all %}
+            <a href="{% url 'view_post' post.id %}">
+              {{ post.title }}
+            </a><br>
+            {% endfor %}
+
+            <strong>Requested:</strong>
+            <a href="{% url 'view_post' trade.item_requested.id %}">
+              {{ trade.item_requested.title }}
+            </a>
             </p>
 
-            <!--Display trade status-->
+            <!-- Trade Status Badge -->
             <span
                 class="badge
                     {% if trade.status == 'Pending' %}bg-warning text-dark
@@ -28,12 +57,11 @@
                 {{ trade.status|capfirst }}
             </span>
         </div>
-        
-        <!--Btn options for trade actions-->
+
+        <!-- Footer Buttons -->
         <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
             {% if trade.status == 'Pending' %}
             <div>
-                <!--OP can accept or deny offer-->
                 {% if trade.item_requested.poster == request.user %}
                     <a href="{% url 'accept_trade' trade.id %}" class="btn btn-sm btn-success me-2">
                         <i class="bi bi-check-circle"></i> Accept
@@ -42,21 +70,25 @@
                     <a href="{% url 'deny_trade' trade.id %}" class="btn btn-sm btn-outline-danger ms-2">
                         <i class="bi bi-x-circle"></i> Deny
                     </a>
-                <!--Rescind trade offer (non-OP action)-->
                 {% else %}
                     <a href="{% url 'delete_trade_offer' trade.id %}" class="btn btn-sm btn-outline-danger"
-                        onclick="return confirm('Do you want to take back this trade offer?');">
+                       onclick="return confirm('Do you want to take back this trade offer?');">
                         <i class="bi bi-trash"></i> Rescind
                     </a>
                 {% endif %}
             </div>
             {% endif %}
 
-            <a href="{% url 'start_chat' trade.offerer.id %}" class="btn btn-sm btn-primary">
-                    <i class="bi bi-chat-dots"></i> Message
+            <!-- Chat Button -->
+            {% if request.user == trade.offerer %}
+            <a href="{% url 'start_chat' trade.receiver.id %}" class="btn btn-sm btn-primary">
+              <i class="bi bi-chat-dots"></i> Message
             </a>
-            
+            {% else %}
+            <a href="{% url 'start_chat' trade.offerer.id %}" class="btn btn-sm btn-primary">
+              <i class="bi bi-chat-dots"></i> Message
+            </a>
+            {% endif %}
         </div>
     </div>
-
 </div>

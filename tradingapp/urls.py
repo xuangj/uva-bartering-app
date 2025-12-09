@@ -11,7 +11,8 @@ from core.views import (
     post_create, user_profile, edit_profile, my_trades, 
     view_post, edit_post, delete_post, view_trade, 
     make_trade_offer, accept_trade, deny_trade, delete_trade_offer, 
-    report_post, change_pfp, delete_account, delete_profile
+    report_post, change_pfp, delete_account, delete_profile,
+    delete_post
 )
 from messaging.views import (
     chat, get_or_create_dm_thread, inbox, start_chat, 
@@ -29,6 +30,7 @@ urlpatterns = [
     path("post/new/", post_create, name="post_create"),
     path("post/<int:post_id>/", view_post, name="view_post"),
     path("post/<int:post_id>/edit/", edit_post, name="edit_post"),
+    path("post/<int:post_id>/delete/", delete_post, name="delete_post"),
     path("report/<int:post_id>/", report_post, name='report_post'),
 
     path("inbox/", inbox, name="inbox"),

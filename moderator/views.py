@@ -4,6 +4,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db import models
 
 from core.models import Profile, Post, Report, Trade
 from messaging.models import Message
@@ -111,9 +112,25 @@ def trades_table(request):
         Trade.objects
         .select_related("offerer", "receiver", "item_requested")
         .prefetch_related("offered_posts")
-        .order_by("-created_at")
+        .order_by(
+            models.Case(
+                models.When(status="Pending", then=0),
+                models.When(status="Accepted", then=1),
+                models.When(status="Denied", then=2),
+                default=3,
+                output_field=models.IntegerField(),
+            ),
+            "-created_at",
+        )
     )
+
     return render(request, "moderator/trades_table.html", {"trades": trades})
+
+@login_required
+@staff_required
+def view_trade(request, trade_id):
+    trade = get_object_or_404(Trade, id=trade_id)
+    return render(request, "moderator/trade_detail.html", {"trade": trade})
 
 
 # ---------------------------------------------------------------------
@@ -288,3 +305,15 @@ def banned_users_table(request):
     return render(request, "moderator/banned_users.html", {
         "banned_users": banned_users
     })
+
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if post.poster != request.user:
+        messages.error(request, "You do not have permission to delete this post.")
+        return redirect("home")
+
+    post.delete()
+    messages.success(request, "Post deleted successfully.")
+    return redirect("user_profile", username=request.user.username)

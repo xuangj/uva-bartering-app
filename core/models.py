@@ -49,13 +49,15 @@ class Profile(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    nickname = models.CharField(max_length=30, blank=True)
     bio = models.TextField(blank=True, max_length=100)
-    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='undergrad')
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='Undergraduate Student')
     sustainability_interests = models.ManyToManyField(SustainabilityInterests, blank=True)
     trading_interests = models.ManyToManyField(TradingInterests, blank=True)
     pfp = models.ImageField(upload_to=unique_post_image_path, blank=True, null=True)
     banned = models.BooleanField(default=False)
     banned_at = models.DateTimeField(null=True, blank=True)
+    has_logged_in_before = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
@@ -114,6 +116,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_available = models.BooleanField(default=True)
 
+
     def clean(self):
         super().clean()
         if self.category == 'Clothing' and not self.clothing_size:
@@ -152,7 +155,7 @@ class Trade(models.Model):
         related_name="trades_offered_with"
     )
 
-    comment = models.TextField(blank=True)
+    comment = models.TextField(blank=True, max_length=300)
     created_at = models.DateTimeField(auto_now_add=True)
 
     status = models.CharField(
@@ -198,7 +201,7 @@ class Report(models.Model):
     )
     
     # The reason for the report
-    comments = models.TextField(verbose_name='Reason for Report')
+    comments = models.TextField(verbose_name='Reason for Report', max_length=500)
     
     created_at = models.DateTimeField(auto_now_add=True)
 

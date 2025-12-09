@@ -9,7 +9,7 @@
         <thead class="table-dark">
             <tr>
                 <th>Username</th>
-                <th>Role</th>
+                <th>Admin?</th>
                 <th>Banned?</th>
                 <th>Actions</th>
             </tr>
@@ -17,8 +17,24 @@
         <tbody>
             {% for u in users %}
             <tr>
-                <td>{{ u.username }}</td>
-                <td>{{ u.profile.role }}</td>
+
+                <!-- USERNAME LINK -->
+                <td>
+                    <a href="{% url 'user_profile' u.username %}" class="text-decoration-none fw-semibold">
+                        {{ u.username }}
+                    </a>
+                </td>
+
+                <!-- IS STAFF FLAG STYLED LIKE BANNED -->
+                <td>
+                    {% if u.is_staff %}
+                        <span class="badge bg-primary">Admin</span>
+                    {% else %}
+                        <span class="badge bg-secondary">User</span>
+                    {% endif %}
+                </td>
+
+                <!-- BANNED FLAG -->
                 <td>
                     {% if u.profile.banned %}
                         <span class="badge bg-danger">Banned</span>
@@ -26,15 +42,17 @@
                         <span class="badge bg-success">Active</span>
                     {% endif %}
                 </td>
+
+                <!-- ACTION BUTTONS -->
                 <td>
                     <a href="{% url 'user_profile' u.username %}" class="btn btn-sm btn-outline-primary">
                         View
                     </a>
 
                     {% if u.profile.banned %}
-                    <a href="{% url 'moderator_unban_user' u.id %}" class="btn btn-sm btn-warning">Unban</a>
+                        <a href="{% url 'moderator_unban_user' u.id %}" class="btn btn-sm btn-warning">Unban</a>
                     {% else %}
-                    <a href="{% url 'moderator_ban_user' u.id %}" class="btn btn-sm btn-warning">Ban</a>
+                        <a href="{% url 'moderator_ban_user' u.id %}" class="btn btn-sm btn-warning">Ban</a>
                     {% endif %}
 
                     <a href="{% url 'moderator_delete_user' u.profile.id %}"

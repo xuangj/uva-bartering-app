@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.db.models import Max
+from django.db.models import Max, Count, Q
 from core.models import Trade
 from django.contrib import messages
 from .models import ChatThread, Message
@@ -35,7 +35,7 @@ def groupchat_create(request):
         return redirect("groupchat_select_users")
 
     # Create the thread
-    thread = ChatThread.objects.create()
+    thread = ChatThread.objects.create(thread_type="group")
     thread.participants.add(request.user)
     thread.participants.add(*selected_ids)
 
@@ -64,53 +64,91 @@ def groupchat_select_users(request):
     }
     return render(request, "create_groupchat.html", context)
 
-# Inbox page
 @login_required
 def inbox(request):
+    from django.db.models import Max, Count, Q
     user = request.user
     search_query = (request.GET.get("search") or "").strip()
 
-    # Base threads: only show threads with at least one message
-    base_threads = (
+    # Conversations (DMs + Groupchats)
+    conversations = (
         ChatThread.objects
         .filter(participants=user)
-        .filter(messages__isnull=False)
-        .annotate(last_msg_at=Max("messages__created_at"))
+        .annotate(
+            last_msg_at=Max("messages__created_at"),
+
+            # ❌ REMOVE old unread_count logic
+            # unread_count=Count(
+            #     "messages",
+            #     filter=(
+            #         ~Q(messages__sender=user) &
+            #         ~Q(messages__reads__user=user)
+            #     ),
+            #     distinct=True,
+            # ),
+        )
         .order_by("-last_msg_at")
-        .prefetch_related("participants", "messages")
+        .prefetch_related("participants")
         .distinct()
     )
 
-    # Filter threads by search (search only usernames)
+    # Search conversations
     if search_query:
-        threads = base_threads.filter(participants__username__icontains=search_query)
-    else:
-        threads = base_threads
-
-    # Other users only shown when searching
-    other_users = None
-    if search_query:
-        # Users already in any shown thread
-        users_in_threads = User.objects.filter(
-            chat_threads__in=threads
+        conversations = conversations.filter(
+            Q(participants__username__icontains=search_query) |
+            Q(participants__profile__nickname__icontains=search_query)
         ).distinct()
 
+    # Correct counts
+    unread_qs = (
+        Message.objects
+        .filter(thread__in=conversations)
+        .exclude(sender=user)
+        .exclude(reads__user=user)
+        .values("thread_id")
+        .annotate(count=Count("id"))
+    )
+    unread_map = {row["thread_id"]: row["count"] for row in unread_qs}
+
+    # Attach unread_count to each thread
+    for t in conversations:
+        t.unread_count = unread_map.get(t.id, 0)
+
+    # Find users WITHOUT a DM thread with the current user
+    dm_threads = ChatThread.objects.filter(
+        participants=user,
+        thread_type="dm"
+    )
+
+    dm_partner_ids = (
+        User.objects.filter(chat_threads__in=dm_threads)
+        .exclude(id=user.id)
+        .values_list("id", flat=True)
+    )
+
+    other_users = None
+    if search_query:
         other_users = (
-            User.objects.filter(username__icontains=search_query)
+            User.objects.filter(
+                Q(username__icontains=search_query) |
+                Q(profile__nickname__icontains=search_query)
+            )
             .exclude(id=user.id)
-            .exclude(id__in=users_in_threads)
+            .exclude(id__in=dm_partner_ids)
             .order_by("username")
         )
 
-    return render(
-        request,
-        "message_inbox.html",
-        {
-            "threads": threads,
-            "other_users": other_users,
-            "search_query": search_query,
-        },
-    )
+    return render(request, "message_inbox.html", {
+        "threads": conversations,
+        "other_users": other_users,
+        "search_query": search_query,
+    })
+
+    return render(request, "message_inbox.html", {
+        "threads": conversations,
+        "other_users": other_users,
+        "search_query": search_query,
+    })
 
 # displays an ongoing chat thread btwn two users and handles sending new msgs
 @login_required
@@ -131,14 +169,52 @@ def chat(request: HttpRequest, thread_id: int) -> HttpResponse:
             )
             return redirect("chat", thread_id=thread.id)
 
-    messages = thread.messages.all().select_related("sender", "related_trade")
+    messages_qs = thread.messages.all().select_related("sender", "related_trade")
+
+    # Group messages by consecutive sender
+    grouped = []
+    current_group = []
+
+    prev_sender_id = None
+
+    for msg in messages_qs:
+        if prev_sender_id != msg.sender_id:
+            # start new group
+            if current_group:
+                grouped.append(current_group)
+            current_group = [msg]
+        else:
+            # same sender → same group
+            current_group.append(msg)
+
+        prev_sender_id = msg.sender_id
+
+    # append last group
+    if current_group:
+        grouped.append(current_group)
+
+    # Mark unread messages as read
+    from messaging.models import MessageRead
+
+    unread_messages = messages_qs.filter(
+        ~Q(sender=request.user) &
+        ~Q(reads__user=request.user)
+    )
+
+    MessageRead.objects.bulk_create(
+        [
+            MessageRead(message=msg, user=request.user)
+            for msg in unread_messages
+        ],
+        ignore_conflicts=True  # prevents duplicates
+    )
 
     return render(
         request,
         "chat.html",
         {
             "thread": thread,
-            "messages": messages,
+            "groups": grouped,
             "participants": thread.participants.all(),
         },
     )

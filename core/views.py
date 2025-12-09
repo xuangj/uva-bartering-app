@@ -97,8 +97,14 @@ def home(request):
 # Login redirect
 @login_required
 def login_redirect_view(request):
+    # Moderator
     if request.user.is_staff:
         return redirect("moderator_dashboard")
+
+     # First-time login check
+    if user.last_login is None:
+        return redirect("user_profile", username=user.username)
+
     return redirect("home")
 
 
@@ -474,4 +480,16 @@ def delete_account(request):
         messages.success(request, "Your account has been permanently deleted.")
         return redirect("account_login")  # or homepage
 
+    return redirect("user_profile", username=request.user.username)
+
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if post.poster != request.user:
+        messages.error(request, "You do not have permission to delete this post.")
+        return redirect("home")
+
+    post.delete()
+    messages.success(request, "Post deleted successfully.")
     return redirect("user_profile", username=request.user.username)
