@@ -50,7 +50,7 @@ class Profile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=30, blank=True)
-    bio = models.TextField(blank=True, max_length=100)
+    bio = models.TextField(blank=True, max_length=300)
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='undergrad')
     sustainability_interests = models.ManyToManyField(SustainabilityInterests, blank=True)
     trading_interests = models.ManyToManyField(TradingInterests, blank=True)
@@ -155,7 +155,7 @@ class Trade(models.Model):
         related_name="trades_offered_with"
     )
 
-    comment = models.TextField(blank=True)
+    comment = models.TextField(blank=True, max_length=300)
     created_at = models.DateTimeField(auto_now_add=True)
 
     status = models.CharField(
@@ -201,7 +201,7 @@ class Report(models.Model):
     )
     
     # The reason for the report
-    comments = models.TextField(verbose_name='Reason for Report')
+    comments = models.TextField(verbose_name='Reason for Report', max_length=500)
     
     created_at = models.DateTimeField(auto_now_add=True)
 

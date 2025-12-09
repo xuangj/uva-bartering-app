@@ -20,6 +20,11 @@
             border-radius: .5rem;
             margin-top: 1rem;
         }
+        .required label::after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -76,13 +81,13 @@
                             {% csrf_token %}
 
                             <!-- ITEMS TO OFFER -->
-                            <div class="mb-3">
+                            <div class="mb-3 required">
                                 <label class="form-label"><strong>Offer an Item</strong></label>
                                 {{ form.offered_posts|add_class:"form-select" }}
                             </div>  
 
                             <!-- DESCRIPTION -->
-                            <div class="mb-3">
+                            <div class="mb-3 required">
                               <label class="form-label"><strong>Message (Optional)</strong></label>
                               {{ form.comment }}
                             </div>
