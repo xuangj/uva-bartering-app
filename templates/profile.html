@@ -1,3 +1,5 @@
+{% load widget_tweaks %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,6 +17,33 @@
     <link rel="stylesheet" href="{% static 'css/pfp_hover.css' %}">
   </head>
 
+  <style>
+    .modal-body .form-control {
+      width: 100%;
+    }
+
+    .modal-body .form-label {
+      margin-bottom: .3rem;
+    }
+
+    .form-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .col-9 ul {
+      padding-left: 0;
+      list-style: none;
+      margin-bottom: 0;
+    }
+
+    .col-9 li {
+      margin-bottom: 4px;
+    }
+
+  </style>
+
   <body>
 
     <!-- NAV BAR -->
@@ -22,7 +51,13 @@
 
     <section class="vh-100">
       <div class="container p-8 h-100">
-        <div class="row d-flex justify-content-center align-items-center mt-4">
+        <div class="row d-flex justify-content-center align-items-center mt-4">           
+            {% if form.errors %}
+            <div class="alert alert-danger mt-3">
+              Please correct your profile information and try again.
+            </div>
+            {% endif %}
+
           <div class="col-md-12 col-xl-4">
 
             <div class="card p-4 pt-0" style="border-radius: 15px;">
@@ -73,41 +108,67 @@
                         </div>
 
                         <!-- ALL fields must be inside modal-body -->
-                        <div class="modal-body">
+                        <div class="modal-body" style="text-align: left; padding-left: 2rem;">
+                          <div class="pe-3">
+                            {% if form.errors %}
+                            <div class="alert alert-danger mt-3">
+                              <strong>Please correct the errors below:</strong>
+                              {{ form.errors }}
+                            </div>
+                            {% endif %}
+                          </div>
+                
+                          <div class="row mb-3">
+                            <div class="col-2">
+                              <label class="form-label">Nickname</label>
+                            </div>
+                            <div class="col-10">
+                              {{ form.nickname|add_class:"form-control" }}
+                            </div>
+                            
 
-                          <div class="mb-3">
-                            <label class="form-label">Nickname</label>
-                            {{ form.nickname }}
                           </div>
 
-                          <div class="mb-3">
-                            <label class="form-label">Bio</label>
-                            {{ form.bio }}
+                          <div class="row mb-3">
+                            <div class="col-2">
+                              <label class="form-label">Bio</label>
+                            </div>
+                            <div class="col-10">
+                              {{ form.bio|add_class:"form-control" }}
+                            </div>
                           </div>
 
-                          <div class="mb-3">
-                            <label class="form-label">Role</label>
-                            {{ form.role }}
+                          <div class="row mb-3">
+                            <div class="col-2">
+                              <label class="form-label">Role</label>
+                            </div>
+                            <div class="col-10">
+                              {{ form.role|add_class:"form-control" }}
+                            </div>
                           </div>
 
-                          <div class="mb-3">
-                            <label class="form-label">Sustainability Interests</label>
-                            {{ form.sustainability_interests }}
+                          <div class="row mb-3">
+                            <div class="col-3">
+                              <label class="form-label">Sustainability Interests</label>
+                            </div>
+                            <div class="col-9">
+                              <div class="form-check">
+                                {{ form.sustainability_interests }}
+                              </div>
+                              
+                            </div>
                           </div>
 
-                          <div class="mb-3">
-                            <label class="form-label">Trading Interests</label>
-                            {{ form.trading_interests }}
+                          <div class="row mb-3">
+                            <div class="col-3">
+                              <label class="form-label">Trading Interests</label>
+                            </div>
+                            <div class="col-9">
+                              <div class="form-check">
+                                {{ form.trading_interests }}                       
+                              </div>
+                            </div>
                           </div>
-
-                          <!-- THIS actually shows your validation errors -->
-                          {% if form.errors %}
-                          <div class="alert alert-danger mt-3">
-                            <strong>Please correct the errors below:</strong>
-                            {{ form.errors }}
-                          </div>
-                          {% endif %}
-
                         </div> <!-- END modal-body -->
 
                         <div class="modal-footer justify-content-between">
@@ -131,8 +192,11 @@
                   </div>
                 </div>
 
+                <!-- ROLE -->
+                <h6 class="mb-2">{{ profile_user.profile.role }}</h6>
+
                 <!-- BIO -->
-                <div class="d-flex text-start mt-1 mb-4">
+                <div class="mt-1 mb-4">
                   <div class="px-3">
                     <p class="text-muted mb-0">
                     {% if profile_user.profile.bio %}
@@ -143,10 +207,7 @@
                     </p>
                   </div>
                 </div>
-
-                <!-- ROLE -->
-                <h6 class="mb-2">{{ profile_user.profile.role }}</h6>
-
+                
                 <!-- SUSTAINABILITY INTERESTS -->
                 <div>
                   {% if profile_user.profile.sustainability_interests.all %}
@@ -232,7 +293,6 @@
 
           </div>
         </div>
-      </div>
       </div>
     </section>
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
