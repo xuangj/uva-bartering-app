@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 
-<nav class="navbar navbar-expand-lg shadow-sm bg-white">
+<nav class="navbar navbar-expand-lg shadow-sm">
   <div class="container">
     <a class="navbar-brand" href="{% url 'home' %}"> <i class="bi bi-house-door-fill"></i>
       UVA Trading App</a>
@@ -13,7 +13,7 @@
 
       <!-- USER DROPDOWN -->
       <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle d-flex align-items-center"
+        <button class="btn dropdown-toggle d-flex align-items-center"
                 type="button"
                 id="dropdownMenuButton"
                 data-bs-toggle="dropdown"
@@ -91,3 +91,49 @@
     </div>
   </div>
 </nav>
+
+<style>
+  .navbar {
+    background-color: #232D4B;
+  }
+
+  .navbar-brand, .navbar-brand:hover {
+    color: white;
+    font-weight: bold;
+  }
+
+  .navbar-brand .bi-house-door-fill {
+    color: #E57200;
+  }
+
+  .dropdown-menu {
+    background-color: #0f1937;
+  }
+
+  #dropdownMenuButton {
+    border-color: #E57200;
+    color: white;
+    font-weight: bold;
+  }
+
+  #dropdownMenuButton:hover {
+    color: #E57200;
+  }
+
+  .dropdown-item {
+    background-color: #0f1937;
+    color: white;
+    font-weight: bold;
+  }
+
+  .dropdown-item:hover {
+    background-color: #0f1937;
+    color: #E57200;
+    font-weight: bold;
+  }
+
+  .dropdown-divider {
+    background-color: white;
+  }
+
+</style>
