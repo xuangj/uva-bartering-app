@@ -1,4 +1,8 @@
 # 🔄 UVA Trading App
+### This team project was developed as a class assignment for the CS 3240: Software Engineering class at the University of Virginia with the following teammates:
+- Audrey Yin
+- Joshua Markle
+- Snail Hernandez
 
 An app that facilitates barternig between students.
 
